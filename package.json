@@ -1,22 +1,26 @@
 {
-  "name": "aadhaar-form-verifier",
-  "version": "1.0.0",
-  "description": "Compare a submitted identity form against an uploaded Aadhaar card image or PDF using an LLM with strict JSON-schema structured output (via OpenRouter).",
+  "name": "indian-document-check",
+  "version": "2.0.0",
+  "description": "Check that someone's typed details match the Indian government document they uploaded — twelve document types, read-and-fill, and strict JSON-schema structured output.",
   "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
-    "synth": "node scripts/generate-synthetic.js",
-    "test:verify": "node scripts/test-verify.js"
+    "start": "npm run vendor --silent && node src/server.js",
+    "dev": "npm run vendor --silent && node --watch src/server.js",
+    "vendor": "node scripts/sync-vendor.js",
+    "samples": "node scripts/generate-synthetic.js",
+    "test": "node scripts/test-verify.js",
+    "cf:dev": "npm run vendor --silent && wrangler dev --port 5285",
+    "cf:deploy": "npm run vendor --silent && wrangler deploy"
   },
   "keywords": [
     "aadhaar",
+    "pan",
     "kyc",
-    "openrouter",
-    "structured-output",
+    "india",
     "document-verification",
-    "gemini"
+    "structured-output",
+    "cloudflare-workers"
   ],
   "license": "MIT",
   "engines": {
@@ -27,5 +31,8 @@
     "express": "^5.1.0",
     "pdfjs-dist": "^4.10.38",
     "sharp": "^0.34.3"
+  },
+  "devDependencies": {
+    "wrangler": "^4.118.0"
   }
 }

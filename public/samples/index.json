@@ -1,0 +1,554 @@
+{
+  "note": "Every person, business, address and number below is invented.",
+  "documents": {
+    "aadhaar": {
+      "image": "aadhaar.png",
+      "printed": {
+        "name": "Rajesh Kumar Sharma",
+        "date_of_birth": "1988-04-17",
+        "gender": "Male",
+        "address": "H.No 42, Gandhi Nagar, Sector 9, Rohini, New Delhi, Delhi - 110085",
+        "aadhaar_number": "2484 1692 4902",
+        "guardian_name": "Mahesh Chand Sharma"
+      },
+      "pdf": "aadhaar.pdf"
+    },
+    "pan": {
+      "image": "pan.png",
+      "printed": {
+        "name": "Priya Venkatesan",
+        "father_name": "S Venkatesan",
+        "date_of_birth": "1995-11-02",
+        "pan_number": "JBJPV3376T"
+      }
+    },
+    "driving_licence": {
+      "image": "driving_licence.png",
+      "printed": {
+        "name": "Mohammed Arif Ansari",
+        "guardian_name": "Abdul Rahim Ansari",
+        "date_of_birth": "1979-01-30",
+        "address": "Flat 604, Sunrise Apartments, Andheri East, Mumbai, Maharashtra - 400069",
+        "licence_number": "MH40 20189006971",
+        "blood_group": "A+",
+        "valid_till": "2031-12-31",
+        "vehicle_classes": "MCWG"
+      }
+    },
+    "passport": {
+      "image": "passport.png",
+      "printed": {
+        "surname": "Reddy",
+        "given_name": "Lakshmi Devi",
+        "date_of_birth": "1992-07-25",
+        "gender": "Female",
+        "place_of_birth": "Hyderabad",
+        "passport_number": "I7941275",
+        "date_of_issue": "2019-06-14",
+        "date_of_expiry": "2029-06-13"
+      }
+    },
+    "voter_id": {
+      "image": "voter_id.png",
+      "printed": {
+        "name": "Sandeep Joshi",
+        "guardian_name": "Ramesh Joshi",
+        "gender": "Male",
+        "date_of_birth": "1985-09-09",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "epic_number": "HZL2273591"
+      }
+    },
+    "vehicle_rc": {
+      "image": "vehicle_rc.png",
+      "printed": {
+        "owner_name": "Mohammed Arif Ansari",
+        "address": "Flat 604, Sunrise Apartments, Andheri East, Mumbai, Maharashtra - 400069",
+        "registration_number": "MH40NJ7675",
+        "make_model": "Hyundai i20 Sportz",
+        "chassis_number": "MA3MRZ86417833728",
+        "engine_number": "GSZ700689101",
+        "fuel_type": "Diesel",
+        "registration_date": "2021-08-19"
+      }
+    },
+    "ration_card": {
+      "image": "ration_card.png",
+      "printed": {
+        "head_of_family": "Kavita Bai Meena",
+        "card_number": "RJ-2019-0724224204",
+        "category": "Above poverty line (APL)",
+        "address": "Ward 4, Village Bagdi, Tehsil Malpura, Tonk, Rajasthan - 304502",
+        "member_count": "5",
+        "fps_name": "FPS Nehru Market"
+      }
+    },
+    "birth_certificate": {
+      "image": "birth_certificate.png",
+      "printed": {
+        "name": "Priya Venkatesan",
+        "date_of_birth": "1995-11-02",
+        "place_of_birth": "District Hospital, Chennai",
+        "gender": "Female",
+        "father_name": "S Venkatesan",
+        "mother_name": "Meenakshi Venkatesan",
+        "registration_number": "BRN/1995/TN/7441946",
+        "date_of_registration": "1995-11-28"
+      }
+    },
+    "gst_certificate": {
+      "image": "gst_certificate.png",
+      "printed": {
+        "legal_name": "Joshi Traders",
+        "trade_name": "Joshi Electricals",
+        "gstin": "23RXTPJ6600R1ZE",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "constitution": "Proprietorship",
+        "registration_date": "2020-04-01"
+      }
+    },
+    "udyam": {
+      "image": "udyam.png",
+      "printed": {
+        "enterprise_name": "Sharma Engineering Works",
+        "udyam_number": "UDYAM-DL-48-5083216",
+        "owner_name": "Rajesh Kumar Sharma",
+        "enterprise_type": "Micro",
+        "address": "H.No 42, Gandhi Nagar, Sector 9, Rohini, New Delhi, Delhi - 110085",
+        "commencement_date": "2018-02-15"
+      }
+    },
+    "nrega_job_card": {
+      "image": "nrega_job_card.png",
+      "printed": {
+        "name": "Kavita Bai Meena",
+        "job_card_number": "RJ-86-214-207-389/778",
+        "guardian_name": "Ramlal Meena",
+        "village": "Bagdi",
+        "panchayat": "Malpura",
+        "district": "Tonk",
+        "state": "Rajasthan",
+        "category": "ST"
+      }
+    },
+    "abha": {
+      "image": "abha.png",
+      "printed": {
+        "name": "Lakshmi Devi Reddy",
+        "abha_number": "90-7077-2889-8717",
+        "date_of_birth": "1992-07-25",
+        "gender": "Female",
+        "abha_address": "lakshmi82@abdm",
+        "address": "7-1-58/2 Ameerpet Main Road, Hyderabad, Telangana - 500016"
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "aadhaar-match",
+      "document": "aadhaar",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "aadhaar.png",
+      "submission": {
+        "name": "Rajesh Kumar Sharma",
+        "date_of_birth": "1988-04-17",
+        "gender": "Male",
+        "address": "H.No 42, Gandhi Nagar, Sector 9, Rohini, New Delhi, Delhi - 110085",
+        "aadhaar_number": "2484 1692 4902",
+        "guardian_name": "Mahesh Chand Sharma"
+      }
+    },
+    {
+      "id": "aadhaar-slip",
+      "document": "aadhaar",
+      "label": "One digit of the Aadhaar number typed wrongly",
+      "expected_verdict": "mismatch",
+      "image": "aadhaar.png",
+      "submission": {
+        "name": "Rajesh Kumar Sharma",
+        "date_of_birth": "1988-04-17",
+        "gender": "Male",
+        "address": "H.No 42, Gandhi Nagar, Sector 9, Rohini, New Delhi, Delhi - 110085",
+        "aadhaar_number": "2484 1692 4906",
+        "guardian_name": "Mahesh Chand Sharma"
+      }
+    },
+    {
+      "id": "pan-match",
+      "document": "pan",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "pan.png",
+      "submission": {
+        "name": "Priya Venkatesan",
+        "father_name": "S Venkatesan",
+        "date_of_birth": "1995-11-02",
+        "pan_number": "JBJPV3376T"
+      }
+    },
+    {
+      "id": "pan-slip",
+      "document": "pan",
+      "label": "Date of birth out by a year",
+      "expected_verdict": "mismatch",
+      "image": "pan.png",
+      "submission": {
+        "name": "Priya Venkatesan",
+        "father_name": "S Venkatesan",
+        "date_of_birth": "1996-11-02",
+        "pan_number": "JBJPV3376T"
+      }
+    },
+    {
+      "id": "driving_licence-match",
+      "document": "driving_licence",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "driving_licence.png",
+      "submission": {
+        "name": "Mohammed Arif Ansari",
+        "guardian_name": "Abdul Rahim Ansari",
+        "date_of_birth": "1979-01-30",
+        "address": "Flat 604, Sunrise Apartments, Andheri East, Mumbai, Maharashtra - 400069",
+        "licence_number": "MH40 20189006971",
+        "blood_group": "A+",
+        "valid_till": "2031-12-31",
+        "vehicle_classes": "MCWG"
+      }
+    },
+    {
+      "id": "driving_licence-slip",
+      "document": "driving_licence",
+      "label": "Address abbreviated — the same place, written shorter",
+      "expected_verdict": "match",
+      "image": "driving_licence.png",
+      "submission": {
+        "name": "Mohammed Arif Ansari",
+        "guardian_name": "Abdul Rahim Ansari",
+        "date_of_birth": "1979-01-30",
+        "address": "Sunrise Apts, Flat 604, Andheri E, Mumbai 400069",
+        "licence_number": "MH40 20189006971",
+        "blood_group": "A+",
+        "valid_till": "2031-12-31",
+        "vehicle_classes": "MCWG"
+      }
+    },
+    {
+      "id": "passport-match",
+      "document": "passport",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "passport.png",
+      "submission": {
+        "surname": "Reddy",
+        "given_name": "Lakshmi Devi",
+        "date_of_birth": "1992-07-25",
+        "gender": "Female",
+        "place_of_birth": "Hyderabad",
+        "passport_number": "I7941275",
+        "date_of_issue": "2019-06-14",
+        "date_of_expiry": "2029-06-13"
+      }
+    },
+    {
+      "id": "passport-slip",
+      "document": "passport",
+      "label": "A different person entirely",
+      "expected_verdict": "mismatch",
+      "image": "passport.png",
+      "submission": {
+        "surname": "Iyer",
+        "given_name": "Ananya",
+        "date_of_birth": "1994-02-11",
+        "gender": "Female",
+        "place_of_birth": "Hyderabad",
+        "passport_number": "I7941275",
+        "date_of_issue": "2019-06-14",
+        "date_of_expiry": "2029-06-13"
+      }
+    },
+    {
+      "id": "voter_id-match",
+      "document": "voter_id",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "voter_id.png",
+      "submission": {
+        "name": "Sandeep Joshi",
+        "guardian_name": "Ramesh Joshi",
+        "gender": "Male",
+        "date_of_birth": "1985-09-09",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "epic_number": "HZL2273591"
+      }
+    },
+    {
+      "id": "voter_id-slip",
+      "document": "voter_id",
+      "label": "Name spelt the other common way (Sandip, not Sandeep)",
+      "expected_verdict": "partial_match",
+      "image": "voter_id.png",
+      "submission": {
+        "name": "Sandip Joshi",
+        "guardian_name": "Ramesh Joshi",
+        "gender": "Male",
+        "date_of_birth": "1985-09-09",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "epic_number": "HZL2273591"
+      }
+    },
+    {
+      "id": "vehicle_rc-match",
+      "document": "vehicle_rc",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "vehicle_rc.png",
+      "submission": {
+        "owner_name": "Mohammed Arif Ansari",
+        "address": "Flat 604, Sunrise Apartments, Andheri East, Mumbai, Maharashtra - 400069",
+        "registration_number": "MH40NJ7675",
+        "make_model": "Hyundai i20 Sportz",
+        "chassis_number": "MA3MRZ86417833728",
+        "engine_number": "GSZ700689101",
+        "fuel_type": "Diesel",
+        "registration_date": "2021-08-19"
+      }
+    },
+    {
+      "id": "vehicle_rc-slip",
+      "document": "vehicle_rc",
+      "label": "Registration number off by one character",
+      "expected_verdict": "mismatch",
+      "image": "vehicle_rc.png",
+      "submission": {
+        "owner_name": "Mohammed Arif Ansari",
+        "address": "Flat 604, Sunrise Apartments, Andheri East, Mumbai, Maharashtra - 400069",
+        "registration_number": "MH40NJ7679",
+        "make_model": "Hyundai i20 Sportz",
+        "chassis_number": "MA3MRZ86417833728",
+        "engine_number": "GSZ700689101",
+        "fuel_type": "Diesel",
+        "registration_date": "2021-08-19"
+      }
+    },
+    {
+      "id": "ration_card-match",
+      "document": "ration_card",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "ration_card.png",
+      "submission": {
+        "head_of_family": "Kavita Bai Meena",
+        "card_number": "RJ-2019-0724224204",
+        "category": "Above poverty line (APL)",
+        "address": "Ward 4, Village Bagdi, Tehsil Malpura, Tonk, Rajasthan - 304502",
+        "member_count": "5",
+        "fps_name": "FPS Nehru Market"
+      }
+    },
+    {
+      "id": "ration_card-slip",
+      "document": "ration_card",
+      "label": "Card type recorded as the wrong category",
+      "expected_verdict": "mismatch",
+      "image": "ration_card.png",
+      "submission": {
+        "head_of_family": "Kavita Bai Meena",
+        "card_number": "RJ-2019-0724224204",
+        "category": "Antyodaya (AAY)",
+        "address": "Ward 4, Village Bagdi, Tehsil Malpura, Tonk, Rajasthan - 304502",
+        "member_count": "5",
+        "fps_name": "FPS Nehru Market"
+      }
+    },
+    {
+      "id": "birth_certificate-match",
+      "document": "birth_certificate",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "birth_certificate.png",
+      "submission": {
+        "name": "Priya Venkatesan",
+        "date_of_birth": "1995-11-02",
+        "place_of_birth": "District Hospital, Chennai",
+        "gender": "Female",
+        "father_name": "S Venkatesan",
+        "mother_name": "Meenakshi Venkatesan",
+        "registration_number": "BRN/1995/TN/7441946",
+        "date_of_registration": "1995-11-28"
+      }
+    },
+    {
+      "id": "birth_certificate-slip",
+      "document": "birth_certificate",
+      "label": "Registration date out by a few days",
+      "expected_verdict": "partial_match",
+      "image": "birth_certificate.png",
+      "submission": {
+        "name": "Priya Venkatesan",
+        "date_of_birth": "1995-11-02",
+        "place_of_birth": "District Hospital, Chennai",
+        "gender": "Female",
+        "father_name": "S Venkatesan",
+        "mother_name": "Meenakshi Venkatesan",
+        "registration_number": "BRN/1995/TN/7441946",
+        "date_of_registration": "1995-11-22"
+      }
+    },
+    {
+      "id": "gst_certificate-match",
+      "document": "gst_certificate",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "gst_certificate.png",
+      "submission": {
+        "legal_name": "Joshi Traders",
+        "trade_name": "Joshi Electricals",
+        "gstin": "23RXTPJ6600R1ZE",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "constitution": "Proprietorship",
+        "registration_date": "2020-04-01"
+      }
+    },
+    {
+      "id": "gst_certificate-slip",
+      "document": "gst_certificate",
+      "label": "Trading name typed where the legal name was asked for",
+      "expected_verdict": "mismatch",
+      "image": "gst_certificate.png",
+      "submission": {
+        "legal_name": "Joshi Electricals",
+        "trade_name": "Joshi Electricals",
+        "gstin": "23RXTPJ6600R1ZE",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "constitution": "Proprietorship",
+        "registration_date": "2020-04-01"
+      }
+    },
+    {
+      "id": "udyam-match",
+      "document": "udyam",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "udyam.png",
+      "submission": {
+        "enterprise_name": "Sharma Engineering Works",
+        "udyam_number": "UDYAM-DL-48-5083216",
+        "owner_name": "Rajesh Kumar Sharma",
+        "enterprise_type": "Micro",
+        "address": "H.No 42, Gandhi Nagar, Sector 9, Rohini, New Delhi, Delhi - 110085",
+        "commencement_date": "2018-02-15"
+      }
+    },
+    {
+      "id": "udyam-slip",
+      "document": "udyam",
+      "label": "Size band typed as Medium when the certificate says otherwise",
+      "expected_verdict": "partial_match",
+      "image": "udyam.png",
+      "submission": {
+        "enterprise_name": "Sharma Engineering Works",
+        "udyam_number": "UDYAM-DL-48-5083216",
+        "owner_name": "Rajesh Kumar Sharma",
+        "enterprise_type": "Medium",
+        "address": "H.No 42, Gandhi Nagar, Sector 9, Rohini, New Delhi, Delhi - 110085",
+        "commencement_date": "2018-02-15"
+      }
+    },
+    {
+      "id": "nrega_job_card-match",
+      "document": "nrega_job_card",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "nrega_job_card.png",
+      "submission": {
+        "name": "Kavita Bai Meena",
+        "job_card_number": "RJ-86-214-207-389/778",
+        "guardian_name": "Ramlal Meena",
+        "village": "Bagdi",
+        "panchayat": "Malpura",
+        "district": "Tonk",
+        "state": "Rajasthan",
+        "category": "ST"
+      }
+    },
+    {
+      "id": "nrega_job_card-slip",
+      "document": "nrega_job_card",
+      "label": "Wrong village recorded",
+      "expected_verdict": "partial_match",
+      "image": "nrega_job_card.png",
+      "submission": {
+        "name": "Kavita Bai Meena",
+        "job_card_number": "RJ-86-214-207-389/778",
+        "guardian_name": "Ramlal Meena",
+        "village": "Chandpura",
+        "panchayat": "Malpura",
+        "district": "Tonk",
+        "state": "Rajasthan",
+        "category": "ST"
+      }
+    },
+    {
+      "id": "abha-match",
+      "document": "abha",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "abha.png",
+      "submission": {
+        "name": "Lakshmi Devi Reddy",
+        "abha_number": "90-7077-2889-8717",
+        "date_of_birth": "1992-07-25",
+        "gender": "Female",
+        "abha_address": "lakshmi82@abdm",
+        "address": "7-1-58/2 Ameerpet Main Road, Hyderabad, Telangana - 500016"
+      }
+    },
+    {
+      "id": "abha-slip",
+      "document": "abha",
+      "label": "Everything right, ABHA address left blank",
+      "expected_verdict": "match",
+      "image": "abha.png",
+      "submission": {
+        "name": "Lakshmi Devi Reddy",
+        "abha_number": "90-7077-2889-8717",
+        "date_of_birth": "1992-07-25",
+        "gender": "Female",
+        "abha_address": "",
+        "address": "7-1-58/2 Ameerpet Main Road, Hyderabad, Telangana - 500016"
+      }
+    },
+    {
+      "id": "wrong-file-receipt",
+      "document": "aadhaar",
+      "label": "A shop receipt uploaded instead of an Aadhaar card",
+      "expected_verdict": "wrong_document",
+      "image": "not-a-document.png",
+      "submission": {
+        "name": "Rajesh Kumar Sharma",
+        "date_of_birth": "1988-04-17",
+        "gender": "Male",
+        "address": "H.No 42, Gandhi Nagar, Sector 9, Rohini, New Delhi, Delhi - 110085",
+        "aadhaar_number": "2484 1692 4902",
+        "guardian_name": "Mahesh Chand Sharma"
+      }
+    },
+    {
+      "id": "wrong-document-pan-for-aadhaar",
+      "document": "aadhaar",
+      "label": "A PAN card handed over when an Aadhaar card was asked for",
+      "expected_verdict": "wrong_document",
+      "image": "pan.png",
+      "submission": {
+        "name": "Rajesh Kumar Sharma",
+        "date_of_birth": "1988-04-17",
+        "gender": "Male",
+        "address": "H.No 42, Gandhi Nagar, Sector 9, Rohini, New Delhi, Delhi - 110085",
+        "aadhaar_number": "2484 1692 4902",
+        "guardian_name": "Mahesh Chand Sharma"
+      }
+    }
+  ]
+}

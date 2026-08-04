@@ -1,66 +1,51 @@
 #!/usr/bin/env node
 /**
- * Runs every synthetic fixture through the real verification pipeline and checks
- * the model's overall verdict against the expected one.
+ * Runs every synthetic case through the real pipeline and checks the answer
+ * against the expected one. Also spot-checks that reading a document back
+ * recovers the values printed on it.
  *
- *   npm run synth && npm run test:verify
- *   npm run test:verify -- 03            # only cases whose id contains "03"
+ *   npm run samples && npm test
+ *   npm test -- pan          # only cases whose id contains "pan"
+ *   npm test -- --read       # only the read-and-fill checks
  *
- * This makes live OpenRouter calls, so it costs a few fractions of a cent.
+ * These are live calls, so a full run costs a few paise.
  */
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import 'dotenv/config';
 
-import { verifySubmission } from '../src/verify.js';
+import { getDocument } from '../public/lib/documents.js';
+import { checkDocument, readDocument } from '../src/core/verify.js';
+import { DEFAULT_MODEL } from '../src/core/api.js';
 
-const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SAMPLES = path.join(ROOT, 'samples');
+const SAMPLES = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public', 'samples');
 
-const COLOR = {
-  reset: '\x1b[0m',
-  dim: '\x1b[2m',
-  green: '\x1b[32m',
-  red: '\x1b[31m',
-  yellow: '\x1b[33m',
+const C = { reset: '\x1b[0m', dim: '\x1b[2m', green: '\x1b[32m', red: '\x1b[31m', yellow: '\x1b[33m' };
+const paint = (colour, text) => `${C[colour]}${text}${C.reset}`;
+
+const config = {
+  apiKey: process.env.OPENROUTER_API_KEY,
+  model: process.env.OPENROUTER_MODEL ?? DEFAULT_MODEL,
 };
 
-const paint = (color, text) => `${COLOR[color]}${text}${COLOR.reset}`;
+const imageOf = async (file) => `data:image/png;base64,${(await readFile(path.join(SAMPLES, file))).toString('base64')}`;
 
-async function main() {
-  const filter = process.argv[2];
+/** Compare loosely — capitalisation, spacing and separators do not count. */
+const loose = (value) => String(value ?? '').toLowerCase().replace(/[\s\-/,.]/g, '');
 
-  let manifest;
-  try {
-    manifest = JSON.parse(await readFile(path.join(SAMPLES, 'index.json'), 'utf8'));
-  } catch {
-    console.error('No fixtures found. Run `npm run synth` first.');
-    process.exit(1);
-  }
-
-  const cases = manifest.cases.filter((c) => !filter || c.id.includes(filter));
-  if (!cases.length) {
-    console.error(`No cases match "${filter}".`);
-    process.exit(1);
-  }
-
-  console.log(`\nRunning ${cases.length} case(s) against ${process.env.OPENROUTER_MODEL ?? 'google/gemini-3.1-flash-lite'}\n`);
-
+async function runChecks(cases) {
   const results = [];
 
   for (const testCase of cases) {
-    const image = await readFile(path.join(SAMPLES, testCase.image));
-    process.stdout.write(`  ${testCase.id.padEnd(30)}`);
-
+    process.stdout.write(`  ${testCase.id.padEnd(34)}`);
     try {
-      const result = await verifySubmission(testCase.submission, `data:image/png;base64,${image.toString('base64')}`);
-      const actual = result.overall_verdict;
-      const passed = actual === testCase.expected_verdict;
+      const result = await checkDocument(testCase.document, testCase.submission, await imageOf(testCase.image), config);
+      const passed = result.overall_verdict === testCase.expected_verdict;
 
       console.log(
         `${passed ? paint('green', 'PASS') : paint('red', 'FAIL')}  ` +
-          `expected ${testCase.expected_verdict.padEnd(14)} got ${actual.padEnd(14)} ` +
+          `want ${testCase.expected_verdict.padEnd(14)} got ${result.overall_verdict.padEnd(14)} ` +
           paint('dim', `${(result.meta.latency_ms / 1000).toFixed(1)}s`),
       );
 
@@ -70,18 +55,84 @@ async function main() {
           console.log(paint('dim', `      · ${f.field}: ${f.verdict} — ${f.reason}`));
         }
       }
-
-      results.push({ id: testCase.id, passed, expected: testCase.expected_verdict, actual });
+      results.push(passed);
     } catch (err) {
       console.log(`${paint('yellow', 'ERROR')} ${err.message}`);
-      results.push({ id: testCase.id, passed: false, expected: testCase.expected_verdict, actual: `error: ${err.message}` });
+      results.push(false);
     }
   }
 
-  const passed = results.filter((r) => r.passed).length;
-  const line = `${passed}/${results.length} cases matched the expected verdict`;
-  console.log(`\n${passed === results.length ? paint('green', line) : paint('red', line)}\n`);
+  return results;
+}
 
+/** Read each document back and see how many printed fields we recover. */
+async function runReads(manifest) {
+  const results = [];
+
+  for (const [docId, entry] of Object.entries(manifest.documents)) {
+    const doc = getDocument(docId);
+    process.stdout.write(`  ${docId.padEnd(34)}`);
+
+    try {
+      const read = await readDocument(docId, await imageOf(entry.image), config);
+      const printed = doc.fields.filter((f) => entry.printed[f.key]);
+      const right = printed.filter((f) => loose(read.extracted[f.key]) === loose(entry.printed[f.key]));
+      const wrong = printed.filter((f) => read.extracted[f.key] && loose(read.extracted[f.key]) !== loose(entry.printed[f.key]));
+
+      // Anything the document does not carry is allowed to come back empty; what
+      // must never happen is a value that is confidently wrong.
+      const passed = wrong.length === 0 && right.length >= Math.ceil(printed.length * 0.8);
+
+      console.log(
+        `${passed ? paint('green', 'PASS') : paint('red', 'FAIL')}  ` +
+          `${String(right.length).padStart(2)}/${printed.length} fields read back exactly ` +
+          paint('dim', `${(read.meta.latency_ms / 1000).toFixed(1)}s`),
+      );
+
+      for (const f of wrong) {
+        console.log(paint('dim', `      · ${f.key}: read "${read.extracted[f.key]}", printed "${entry.printed[f.key]}"`));
+      }
+      results.push(passed);
+    } catch (err) {
+      console.log(`${paint('yellow', 'ERROR')} ${err.message}`);
+      results.push(false);
+    }
+  }
+
+  return results;
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  const only = args.find((a) => !a.startsWith('--'));
+  const readsOnly = args.includes('--read');
+  const checksOnly = args.includes('--check');
+
+  let manifest;
+  try {
+    manifest = JSON.parse(await readFile(path.join(SAMPLES, 'index.json'), 'utf8'));
+  } catch {
+    console.error('No samples found. Run `npm run samples` first.');
+    process.exit(1);
+  }
+
+  console.log('');
+  let results = [];
+
+  if (!checksOnly) {
+    console.log('Reading each document and comparing with what was printed on it\n');
+    results = results.concat(await runReads(only ? { ...manifest, documents: Object.fromEntries(Object.entries(manifest.documents).filter(([id]) => id.includes(only))) } : manifest));
+    console.log('');
+  }
+
+  if (!readsOnly) {
+    console.log('Checking filled-in forms against their documents\n');
+    results = results.concat(await runChecks(manifest.cases.filter((c) => !only || c.id.includes(only))));
+  }
+
+  const passed = results.filter(Boolean).length;
+  const line = `${passed}/${results.length} checks passed`;
+  console.log(`\n${passed === results.length ? paint('green', line) : paint('red', line)}\n`);
   process.exit(passed === results.length ? 0 : 1);
 }
 

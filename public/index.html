@@ -3,166 +3,146 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Aadhaar Form Verifier</title>
+    <title>Document Check</title>
+    <meta name="description" content="Check that someone's details match the Indian government document they have given you." />
     <link rel="stylesheet" href="/styles.css" />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪪</text></svg>"
-    />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪪</text></svg>" />
   </head>
   <body>
     <header class="topbar">
-      <div class="topbar-inner">
+      <div class="wrap topbar-inner">
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">🪪</span>
           <div>
-            <h1>Aadhaar Form Verifier</h1>
-            <p class="brand-sub">Does what they typed match the card they uploaded?</p>
+            <strong>Document Check</strong>
+            <span>Does what someone typed match the document they gave you?</span>
           </div>
         </div>
-        <div class="topbar-meta">
-          <span class="pill" id="model-pill">model: …</span>
-          <span class="pill" id="key-pill">key: …</span>
-        </div>
+        <button type="button" class="link-btn" id="how-btn" aria-expanded="false" aria-controls="how-panel">How this works</button>
       </div>
     </header>
 
-    <main class="layout">
-      <!-- ── Left: the form ───────────────────────────────────────── -->
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Applicant details</h2>
-          <button type="button" class="ghost-btn" id="sample-btn">Load sample</button>
-        </div>
+    <section class="how" id="how-panel" hidden>
+      <div class="wrap how-inner">
+        <ol>
+          <li><strong>Pick the document.</strong> Twelve Indian documents are supported, from an Aadhaar card to a GST certificate.</li>
+          <li><strong>Add a photo, a scan or a PDF of it.</strong> Nothing is stored — the picture is used once and thrown away.</li>
+          <li><strong>Let it fill the form in</strong>, or type the details yourself if you already have them.</li>
+          <li><strong>Press check.</strong> You get a plain answer, field by field, with what the document actually says.</li>
+        </ol>
+        <p class="how-note">
+          Every sample document here is made up. This is a demonstration — it does not contact any government
+          database, and it cannot tell a good forgery from a real document. Never put a real ID through it.
+        </p>
+      </div>
+    </section>
 
-        <form id="verify-form" novalidate>
-          <div class="field">
-            <label for="name">Full name <span class="req">*</span></label>
-            <input id="name" name="name" type="text" autocomplete="off" placeholder="As printed on the card" required />
-          </div>
+    <main class="wrap layout">
+      <!-- ── Left column: the work ──────────────────────────────── -->
+      <div class="column">
+        <!-- Step 1 -->
+        <section class="card" id="step-doc">
+          <h2><span class="step-no">1</span> Which document do you have?</h2>
+          <div class="doc-grid" id="doc-grid" role="radiogroup" aria-label="Document type"></div>
+        </section>
 
-          <div class="field-row">
-            <div class="field">
-              <label for="date_of_birth">Date of birth</label>
-              <input id="date_of_birth" name="date_of_birth" type="date" />
+        <!-- Step 2 -->
+        <section class="card" id="step-file" hidden>
+          <h2><span class="step-no">2</span> Add the document</h2>
+          <p class="lede" id="file-lede">Take a photo of it, or drop in a scan or PDF.</p>
+
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose a file">
+            <input id="file-input" type="file" accept="image/*,application/pdf" hidden />
+            <div class="drop-empty" id="drop-empty">
+              <span class="drop-icon" aria-hidden="true">+</span>
+              <strong>Choose a file, or drag one here</strong>
+              <span class="muted">A photo, a scan, or a PDF</span>
             </div>
-            <div class="field">
-              <label for="gender">Gender</label>
-              <select id="gender" name="gender">
-                <option value="">—</option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Transgender</option>
-              </select>
-            </div>
+            <figure class="preview" id="preview" hidden>
+              <img id="preview-img" alt="The document you added" />
+              <figcaption id="preview-caption"></figcaption>
+            </figure>
           </div>
 
-          <div class="field">
-            <label for="address">Address</label>
-            <textarea id="address" name="address" rows="3" placeholder="House / street, locality, city, state, PIN"></textarea>
+          <div class="row-between">
+            <button type="button" class="link-btn" id="sample-btn">Use a sample instead</button>
+            <button type="button" class="link-btn" id="clear-file" hidden>Remove</button>
+          </div>
+        </section>
+
+        <!-- Step 3 -->
+        <section class="card" id="step-form" hidden>
+          <h2><span class="step-no">3</span> The details to check</h2>
+          <p class="lede">Type what you have been told, or let the document fill it in and correct anything that looks wrong.</p>
+
+          <button type="button" class="secondary-btn" id="read-btn">
+            <span id="read-btn-label">Read the document and fill this in</span>
+          </button>
+          <p class="read-note" id="read-note" hidden></p>
+
+          <form id="check-form" novalidate>
+            <div id="fields"></div>
+            <button type="submit" class="primary-btn" id="check-btn">Check the details</button>
+            <p class="alert" id="form-error" hidden></p>
+          </form>
+        </section>
+      </div>
+
+      <!-- ── Right column: the answer ────────────────────────────── -->
+      <aside class="column">
+        <section class="card result-card">
+          <h2 class="result-head">The answer</h2>
+
+          <div class="empty" id="empty">
+            <p>Once you have picked a document, added it and filled in the details, the answer appears here.</p>
           </div>
 
-          <div class="field">
-            <label for="aadhaar_number">Aadhaar number <span class="req">*</span></label>
-            <input
-              id="aadhaar_number"
-              name="aadhaar_number"
-              type="text"
-              inputmode="numeric"
-              autocomplete="off"
-              placeholder="1234 5678 9012"
-              maxlength="14"
-              required
-            />
-            <p class="hint" id="aadhaar-hint">12 digits. Checked locally against the Verhoeff checksum.</p>
+          <div class="busy" id="busy" hidden>
+            <div class="spinner" aria-hidden="true"></div>
+            <p id="busy-text">Reading the document…</p>
           </div>
 
-          <div class="field">
-            <label for="guardian_name">Father's / guardian's name <span class="opt">optional</span></label>
-            <input id="guardian_name" name="guardian_name" type="text" autocomplete="off" placeholder="If printed on the card" />
-          </div>
-
-          <hr class="rule" />
-
-          <div class="field">
-            <label for="file-input">Aadhaar document <span class="req">*</span></label>
-            <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-describedby="drop-hint">
-              <input id="file-input" type="file" accept="image/*,application/pdf" hidden />
-              <div class="dropzone-empty" id="dropzone-empty">
-                <span class="drop-icon" aria-hidden="true">⬆</span>
-                <strong>Drop an image or PDF</strong>
-                <span id="drop-hint" class="hint">PNG, JPEG, WebP or PDF — the first page of a PDF is rendered to an image in your browser.</span>
+          <div id="result" hidden>
+            <div class="verdict" id="verdict">
+              <span class="verdict-icon" id="verdict-icon" aria-hidden="true"></span>
+              <div>
+                <strong id="verdict-title"></strong>
+                <p id="verdict-summary"></p>
               </div>
-              <figure class="preview" id="preview" hidden>
-                <img id="preview-img" alt="Preview of the uploaded document" />
-                <figcaption id="preview-caption"></figcaption>
-              </figure>
             </div>
-            <button type="button" class="ghost-btn small" id="clear-file" hidden>Remove document</button>
-          </div>
 
-          <button type="submit" class="primary-btn" id="submit-btn">Verify against document</button>
-          <p class="form-error" id="form-error" hidden></p>
-        </form>
-      </section>
+            <h3>Each detail</h3>
+            <ul class="fieldlist" id="field-list"></ul>
 
-      <!-- ── Right: the result ─────────────────────────────────────── -->
-      <section class="panel results" id="results-panel">
-        <div class="panel-head">
-          <h2>Result</h2>
-          <span class="pill subtle" id="latency-pill" hidden></span>
-        </div>
+            <h3>What the document says</h3>
+            <dl class="readout" id="readout"></dl>
 
-        <div class="placeholder" id="placeholder">
-          <p>Fill in the form, attach the card, and the result lands here.</p>
-        </div>
-
-        <div class="loading" id="loading" hidden>
-          <div class="spinner" aria-hidden="true"></div>
-          <p>Reading the document…</p>
-        </div>
-
-        <div id="result" hidden>
-          <div class="verdict" id="verdict">
-            <span class="verdict-dot" aria-hidden="true"></span>
-            <div>
-              <strong id="verdict-title"></strong>
-              <span id="verdict-confidence" class="verdict-conf"></span>
+            <div id="concerns-block" hidden>
+              <h3>Worth a closer look</h3>
+              <ul class="concerns" id="concerns"></ul>
             </div>
+
+            <div id="checks-block" hidden>
+              <h3>Checks done without reading the document</h3>
+              <ul class="checks" id="checks"></ul>
+            </div>
+
+            <details class="tech">
+              <summary>Show the full record</summary>
+              <pre id="raw"></pre>
+            </details>
           </div>
-
-          <p class="summary" id="summary"></p>
-
-          <h3 class="section-title">Field by field</h3>
-          <ul class="fields" id="field-list"></ul>
-
-          <h3 class="section-title">Read from the document</h3>
-          <dl class="extracted" id="extracted"></dl>
-
-          <div id="flags-block" hidden>
-            <h3 class="section-title">Red flags</h3>
-            <ul class="flags" id="flags"></ul>
-          </div>
-
-          <h3 class="section-title">Local checks</h3>
-          <ul class="checks" id="checks"></ul>
-
-          <h3 class="section-title">Document assessment</h3>
-          <p class="doc-note" id="doc-note"></p>
-
-          <details class="raw">
-            <summary>Raw JSON response</summary>
-            <pre id="raw-json"></pre>
-          </details>
-        </div>
-      </section>
+        </section>
+      </aside>
     </main>
 
     <footer class="foot">
-      <p>
-        Synthetic test data only. This is a demo of structured LLM output — it is not a UIDAI-authorised identity check and
-        must not be used as one.
-      </p>
+      <div class="wrap">
+        <p>
+          A demonstration built on made-up documents. It does not check anything against a government database, and
+          it is not proof of identity. Do not put a real ID through it.
+        </p>
+      </div>
     </footer>
 
     <script type="module" src="/app.js"></script>

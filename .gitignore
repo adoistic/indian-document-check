@@ -4,12 +4,16 @@
 !.env.example
 *.key
 secrets.json
+.dev.vars
 
 # Dependencies
 node_modules/
 
-# Generated synthetic fixtures (regenerate with `npm run synth`)
-samples/
+# Copied out of node_modules by `npm run vendor`
+public/vendor/
+
+# Cloudflare
+.wrangler/
 
 # Local tooling
 .claude/
