@@ -4,6 +4,8 @@ Somebody hands you an Aadhaar card, a PAN card, a ration card, a GST certificate
 
 That is the whole app. Pick which of twelve Indian government documents you have, add a photo, a scan or a PDF of it, and either type the details or let the app read them off the document for you. Press check and you get a plain answer, field by field, alongside what the document actually says.
 
+**Try it: [indian-document-check.appsadoistic.workers.dev](https://indian-document-check.appsadoistic.workers.dev)** — press *Use a sample instead* at step 2; no real document needed.
+
 > Every sample document here is invented. This is a demonstration of document reading — it does not contact any government database, and it cannot tell a good forgery from a real document. Do not put a real ID through it.
 
 ---
