@@ -101,8 +101,9 @@ function selectDocument(id) {
 
   el.stepFile.hidden = false;
   el.stepForm.hidden = false;
-  el.fileLede.textContent = `Take a photo of the ${currentDoc.name.toLowerCase()}, or drop in a scan or PDF.`;
-  el.readBtnLabel.textContent = `Read the ${currentDoc.name.toLowerCase()} and fill this in`;
+  // Names are used as written — lowercasing turns "GST" into "gst".
+  el.fileLede.textContent = `Take a photo of the ${currentDoc.name}, or drop in a scan or PDF.`;
+  el.readBtnLabel.textContent = `Read the ${currentDoc.name} and fill this in`;
 
   buildForm(currentDoc);
   clearFile();
@@ -346,7 +347,7 @@ function openSampleSheet() {
   const inner = document.createElement('div');
   inner.className = 'sheet-inner';
   inner.append(
-    node('h3', `Sample ${currentDoc.name.toLowerCase()}`),
+    node('h3', `Sample ${currentDoc.name}`),
     node('p', 'A made-up document, so you can try this without a real one. Pick how you want to start.', 'lede'),
   );
 
@@ -458,7 +459,7 @@ el.readBtn.addEventListener('click', async () => {
 
     const assessment = payload.document_assessment ?? {};
     if (assessment.document_type !== 'expected_document') {
-      note(`That does not look like ${aOrAn(currentDoc.name.toLowerCase())}. ${assessment.notes ?? ''}`.trim(), true);
+      note(`That does not look like ${aOrAn(currentDoc.name)}. ${assessment.notes ?? ''}`.trim(), true);
       return;
     }
 
