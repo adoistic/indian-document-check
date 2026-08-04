@@ -50,7 +50,7 @@ export const handlers = {
     const submission = submissionFor(doc, body);
     const missing = doc.fields.filter((f) => f.required && !String(submission[f.key] ?? '').trim());
     if (missing.length) {
-      return { status: 400, body: { error: `Still needed: ${missing.map((f) => f.label.toLowerCase()).join(', ')}.` } };
+      return { status: 400, body: { error: `Still needed: ${missing.map((f) => f.label).join(', ')}.` } };
     }
 
     try {

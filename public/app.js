@@ -361,8 +361,12 @@ function openSampleSheet() {
       run: () => useSample(entry.image, 'Sample document', null),
     },
     ...cases.map((testCase) => ({
-      title: testCase.id.endsWith('-match') ? 'Document and correct details' : `Document, with a snag: ${lowerFirst(testCase.label)}`,
-      note: `Expected answer: ${VERDICT[testCase.expected_verdict].title.toLowerCase()}.`,
+      title: testCase.id.endsWith('-match')
+        ? 'Document and correct details'
+        : testCase.expected_verdict === 'wrong_document'
+          ? `The wrong file: ${lowerFirst(testCase.label)}`
+          : `Document, with a snag: ${lowerFirst(testCase.label)}`,
+      note: `Expected answer: ${lowerFirst(VERDICT[testCase.expected_verdict].title)}.`,
       run: () => useSample(testCase.image, testCase.label, testCase.submission),
     })),
   ];
@@ -527,7 +531,7 @@ el.form.addEventListener('submit', async (e) => {
   for (const field of currentDoc.fields) body[field.key] = $(field.key)?.value ?? '';
 
   const missing = currentDoc.fields.filter((f) => f.required && !String(body[f.key]).trim());
-  if (missing.length) return showError(`Still needed: ${missing.map((f) => f.label.toLowerCase()).join(', ')}.`);
+  if (missing.length) return showError(`Still needed: ${missing.map((f) => f.label).join(', ')}.`);
 
   el.checkBtn.disabled = true;
   el.checkBtn.textContent = 'Checking…';
