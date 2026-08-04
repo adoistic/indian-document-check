@@ -13,7 +13,7 @@
  * Output goes to public/samples so both the local server and the deployed site
  * serve the same files.
  */
-import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdir, writeFile, readdir, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -64,6 +64,10 @@ function gstin(stateCode, pan) {
 }
 
 const udyamNumber = (state) => `UDYAM-${state}-${digits(2)}-${digits(7)}`;
+
+/** U/L + industry + state + year + company type + registration number = 21 characters. */
+const cinNumber = (state, year, type = 'PTC') => `U${digits(5)}${state}${year}${type}${digits(6)}`;
+const ifscCode = () => `${letters(4)}0${digits(6)}`;
 const abhaNumber = () => {
   const d = digits(14);
   return `${d.slice(0, 2)}-${d.slice(2, 6)}-${d.slice(6, 10)}-${d.slice(10)}`;
@@ -260,6 +264,34 @@ const CARD_VALUES = {
     category: pick(['General', 'OBC', 'SC', 'ST']),
   }),
 
+  din_letter: (p) => ({
+    name: p.name,
+    din: digits(8),
+    father_name: p.father,
+    date_of_birth: p.dob,
+    address: p.address,
+    date_of_allotment: '2017-11-06',
+  }),
+
+  incorporation: (p) => ({
+    company_name: `${p.surname} Systems Private Limited`,
+    cin: cinNumber(p.state, 2013),
+    date_of_incorporation: '2013-05-22',
+    registered_office: p.address,
+    company_pan: panNumber(p.surname, 'C'),
+    directors: `${p.name}, ${PEOPLE.lakshmi.name}`,
+  }),
+
+  bank_passbook: (p) => ({
+    account_holder: p.name,
+    account_number: digits(14),
+    ifsc: ifscCode(),
+    bank_name: 'Bharat National Bank',
+    branch: `${p.city} Main Branch`,
+    address: p.address,
+    customer_id: digits(9),
+  }),
+
   abha: (p) => ({
     name: p.name,
     abha_number: abhaNumber(),
@@ -284,6 +316,9 @@ const CAST = {
   udyam: PEOPLE.rajesh,
   nrega_job_card: PEOPLE.kavita,
   abha: PEOPLE.lakshmi,
+  din_letter: PEOPLE.sandeep,
+  incorporation: PEOPLE.sandeep,
+  bank_passbook: PEOPLE.arif,
 };
 
 /**
@@ -351,6 +386,21 @@ const SLIPS = {
     expected: 'match',
     change: () => ({ abha_address: '' }),
   },
+  din_letter: {
+    label: 'Two digits of the director ID swapped round',
+    expected: 'mismatch',
+    change: (v) => ({ din: `${v.din.slice(0, 4)}${v.din[5]}${v.din[4]}${v.din.slice(6)}` }),
+  },
+  incorporation: {
+    label: 'Company name given without "Private Limited"',
+    expected: 'partial_match',
+    change: (v) => ({ company_name: v.company_name.replace(' Private Limited', '') }),
+  },
+  bank_passbook: {
+    label: 'Branch code typed with a letter O instead of a zero',
+    expected: 'mismatch',
+    change: (v) => ({ ifsc: `${v.ifsc.slice(0, 4)}O${v.ifsc.slice(5)}` }),
+  },
 };
 
 /** Change one digit so a number stays well-formed but stops matching. */
@@ -400,9 +450,19 @@ async function writePng(svg, file) {
   await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(path.join(OUT, file));
 }
 
+/**
+ * Clear out the previous run's files but leave any subdirectory alone — the
+ * benchmark dossier lives in one, and wiping the whole tree took it with it.
+ */
+async function clean(directory) {
+  await mkdir(directory, { recursive: true });
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (entry.isFile()) await unlink(path.join(directory, entry.name));
+  }
+}
+
 async function main() {
-  await rm(OUT, { recursive: true, force: true });
-  await mkdir(OUT, { recursive: true });
+  await clean(OUT);
 
   const manifest = {
     note: 'Every person, business, address and number below is invented.',

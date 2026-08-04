@@ -663,3 +663,313 @@ fetch('/api/config')
     if (!cfg.ready) showError('This demonstration has not been set up with the key it needs, so documents cannot be read.');
   })
   .catch(() => {});
+
+// ══ Sorting a pile ═══════════════════════════════════════════
+// Same page, different job: many files at once, nobody says what they are,
+// and the answer is who they belong to rather than whether they match.
+
+const pile = {
+  modeOne: $('mode-one'),
+  modePile: $('mode-pile'),
+  singleView: $('single-view'),
+  view: $('pile-view'),
+  howSingle: $('how-single'),
+  howPile: $('how-pile'),
+  drop: $('pile-drop'),
+  input: $('pile-input'),
+  tray: $('tray'),
+  clear: $('pile-clear'),
+  sampleBtn: $('pile-sample-btn'),
+  go: $('pile-go'),
+  error: $('pile-error'),
+  empty: $('pile-empty'),
+  busy: $('pile-busy'),
+  busyText: $('pile-busy-text'),
+  result: $('pile-result'),
+  headline: $('pile-headline'),
+  summary: $('pile-summary'),
+  conflictsBlock: $('pile-conflicts-block'),
+  conflicts: $('pile-conflicts'),
+  entities: $('entities'),
+  relBlock: $('rel-block'),
+  rels: $('rels'),
+  asideBlock: $('aside-block'),
+  asideList: $('aside-list'),
+  notesBlock: $('pile-notes-block'),
+  notes: $('pile-notes'),
+  raw: $('pile-raw'),
+};
+
+const ID_WORDS = {
+  aadhaar: 'Aadhaar',
+  pan: 'PAN',
+  passport: 'Passport',
+  voter_id: 'Voter ID',
+  driving_licence: 'Licence',
+  vehicle_registration: 'Vehicle',
+  gstin: 'GST',
+  udyam: 'Udyam',
+  din: 'Director ID',
+  cin: 'Company no.',
+  abha: 'ABHA',
+  ration_card: 'Ration card',
+  job_card: 'Job card',
+  bank_account: 'Account',
+  ifsc: 'Branch',
+  birth_registration: 'Birth entry',
+  other: 'Other',
+};
+
+let files = [];
+
+// ── Mode switch ──────────────────────────────────────────────
+function setMode(mode) {
+  const sorting = mode === 'pile';
+  pile.modeOne.setAttribute('aria-selected', String(!sorting));
+  pile.modePile.setAttribute('aria-selected', String(sorting));
+  pile.singleView.hidden = sorting;
+  pile.view.hidden = !sorting;
+  pile.howSingle.hidden = sorting;
+  pile.howPile.hidden = !sorting;
+}
+
+pile.modeOne.addEventListener('click', () => setMode('single'));
+pile.modePile.addEventListener('click', () => setMode('pile'));
+
+// ── Adding files ─────────────────────────────────────────────
+pile.drop.addEventListener('click', () => pile.input.click());
+pile.drop.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    pile.input.click();
+  }
+});
+
+for (const type of ['dragenter', 'dragover']) {
+  pile.drop.addEventListener(type, (e) => {
+    e.preventDefault();
+    pile.drop.classList.add('dragover');
+  });
+}
+
+for (const type of ['dragleave', 'drop']) {
+  pile.drop.addEventListener(type, (e) => {
+    e.preventDefault();
+    pile.drop.classList.remove('dragover');
+  });
+}
+
+pile.drop.addEventListener('drop', (e) => addFiles([...(e.dataTransfer?.files ?? [])]));
+pile.input.addEventListener('change', () => addFiles([...(pile.input.files ?? [])]));
+pile.clear.addEventListener('click', () => {
+  files = [];
+  pile.input.value = '';
+  drawTray();
+});
+
+async function addFiles(list) {
+  pileError(null);
+  const room = 20 - files.length;
+  if (list.length > room) pileError(`Only twenty at a time — the first ${room} were added.`);
+
+  for (const file of list.slice(0, room)) {
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    try {
+      const image = isPdf ? await pdfFirstPage(file) : await imageToDataUrl(file);
+      files.push({ id: `${files.length + 1}-${file.name}`, name: file.name, image });
+      drawTray();
+    } catch (err) {
+      pileError(`${file.name} could not be opened: ${err.message}`);
+    }
+  }
+}
+
+function drawTray() {
+  pile.tray.replaceChildren(
+    ...files.map((file, index) => {
+      const li = document.createElement('li');
+
+      const thumb = document.createElement('img');
+      thumb.src = file.image;
+      thumb.alt = '';
+
+      const name = node('span', file.name, 'tray-name');
+      const state = node('span', file.state ?? 'ready', `tray-state ${file.stateClass ?? ''}`);
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.setAttribute('aria-label', `Remove ${file.name}`);
+      remove.textContent = '×';
+      remove.addEventListener('click', () => {
+        files.splice(index, 1);
+        drawTray();
+      });
+
+      li.append(thumb, name, state, remove);
+      return li;
+    }),
+  );
+
+  pile.clear.hidden = files.length === 0;
+  pile.go.disabled = files.length === 0;
+  pile.go.textContent = files.length ? `Sort these ${files.length} document${files.length === 1 ? '' : 's'}` : 'Sort these documents';
+}
+
+// ── A ready-made pile ────────────────────────────────────────
+pile.sampleBtn.addEventListener('click', async () => {
+  pileError(null);
+  pileBusy('Fetching a ready-made pile…');
+
+  try {
+    const manifest = await (await fetch('/samples/dossier/index.json')).json();
+    files = [];
+    for (const entry of manifest.files) {
+      const blob = await (await fetch(`/samples/dossier/${entry.image}`)).blob();
+      files.push({ id: entry.image, name: entry.image, image: await blobToDataUrl(blob) });
+    }
+    drawTray();
+    pileError(null);
+  } catch (err) {
+    pileError(`Could not load the sample pile: ${err.message}`);
+  } finally {
+    pileBusy(null);
+  }
+});
+
+// ── Sorting ──────────────────────────────────────────────────
+pile.go.addEventListener('click', async () => {
+  pileError(null);
+  pile.go.disabled = true;
+  pileBusy(`Working through ${files.length} document${files.length === 1 ? '' : 's'}…`);
+
+  try {
+    const res = await fetch('/api/sort', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ files: files.map(({ id, name, image }) => ({ id, name, image })) }),
+    });
+    const payload = await res.json();
+    if (!res.ok) throw new Error(payload.error ?? 'the pile could not be sorted');
+    drawPile(payload);
+  } catch (err) {
+    pileError(err.message);
+  } finally {
+    pile.go.disabled = files.length === 0;
+    pileBusy(null);
+  }
+});
+
+function drawPile(result) {
+  // Label each file in the tray with what it turned out to be.
+  for (const file of files) {
+    const found = result.documents.find((d) => d.id === file.id);
+    file.state = found?.recognised ? found.typeName : (found?.typeName ?? 'not read');
+    file.stateClass = found?.recognised ? 'done' : 'unknown';
+  }
+  drawTray();
+
+  pile.empty.hidden = true;
+  pile.result.hidden = false;
+
+  const people = result.entities.filter((e) => e.kind === 'person').length;
+  const companies = result.entities.length - people;
+  pile.headline.textContent =
+    result.narrative?.headline ??
+    `${count(people, 'person', 'people')} and ${count(companies, 'organisation', 'organisations')}.`;
+  pile.summary.textContent = result.narrative?.summary ?? '';
+
+  const notes = new Map((result.narrative?.entity_notes ?? []).map((n) => [n.entity_id, n.note]));
+  pile.entities.replaceChildren(...result.entities.map((entity) => drawEntity(entity, result, notes.get(entity.id))));
+
+  pile.relBlock.hidden = result.relationships.length === 0;
+  pile.rels.replaceChildren(
+    ...result.relationships.map((rel) => {
+      const li = document.createElement('li');
+      li.append(node('span', rel.to_name ? `${rel.from_name} → ${rel.to_name}` : rel.from_name, 'rel-who'));
+      li.append(node('span', rel.reason, 'rel-why'));
+      return li;
+    }),
+  );
+
+  pile.conflictsBlock.hidden = result.conflicts.length === 0;
+  pile.conflicts.replaceChildren(...result.conflicts.map((c) => node('li', c.message)));
+
+  const aside = result.documents.filter((d) => !d.recognised);
+  pile.asideBlock.hidden = aside.length === 0;
+  pile.asideList.replaceChildren(
+    ...aside.map((d) => node('li', `${d.name} — ${d.error ?? d.typeName}. Not grouped with anything.`)),
+  );
+
+  const extras = result.narrative?.extra_concerns ?? [];
+  pile.notesBlock.hidden = extras.length === 0;
+  pile.notes.replaceChildren(...extras.map((c) => node('li', c)));
+
+  pile.raw.textContent = JSON.stringify(result, null, 2);
+}
+
+function drawEntity(entity, result, note) {
+  const card = document.createElement('div');
+  card.className = `entity ${entity.kind}`;
+
+  const head = document.createElement('div');
+  head.className = 'entity-head';
+  head.append(node('strong', entity.name), node('span', entity.kind === 'company' ? 'Organisation' : 'Person', 'entity-kind'));
+  card.append(head);
+
+  if (note) card.append(node('p', note, 'entity-note'));
+
+  const docs = document.createElement('ul');
+  docs.className = 'entity-docs';
+  for (const id of entity.documents) {
+    const doc = result.documents.find((d) => d.id === id);
+    const li = document.createElement('li');
+    li.append(node('span', doc?.typeName ?? id, 'doc-name'), node('span', doc?.name ?? '', 'doc-file'));
+    docs.append(li);
+  }
+  card.append(docs);
+
+  // Chassis numbers and customer IDs are real, but they identify nothing you
+  // could look someone up by, so they stay out of the summary.
+  const worthShowing = entity.identifiers.filter((i) => i.type !== 'other');
+
+  if (worthShowing.length) {
+    const ids = document.createElement('div');
+    ids.className = 'ids';
+    for (const identifier of worthShowing) {
+      const chip = document.createElement('span');
+      chip.className = `id-chip${identifier.derived ? ' derived' : ''}`;
+      chip.append(node('span', ID_WORDS[identifier.type] ?? identifier.type, 'id-kind'), document.createTextNode(identifier.value));
+      if (identifier.derived) chip.title = 'Not printed anywhere — worked out from another number on the documents.';
+      ids.append(chip);
+    }
+    card.append(ids);
+  }
+
+  const reasons = [...new Set(entity.evidence)];
+  if (reasons.length) {
+    const why = document.createElement('p');
+    why.className = 'why';
+    why.append(node('strong', 'Grouped because: '), document.createTextNode(reasons.join(' ')));
+    card.append(why);
+  }
+
+  return card;
+}
+
+const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+function pileBusy(message) {
+  pile.busy.hidden = !message;
+  if (message) {
+    pile.busyText.textContent = message;
+    pile.empty.hidden = true;
+    pile.result.hidden = true;
+  } else if (pile.result.hidden) {
+    pile.empty.hidden = false;
+  }
+}
+
+function pileError(message) {
+  pile.error.hidden = !message;
+  pile.error.textContent = message ?? '';
+}

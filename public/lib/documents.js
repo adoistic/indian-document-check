@@ -354,6 +354,108 @@ export const DOCUMENTS = [
   },
 ];
 
+DOCUMENTS.push(
+  {
+    id: 'din_letter',
+    name: 'Director ID letter',
+    issuer: 'Ministry of Corporate Affairs',
+    blurb: 'Allots a person the 8-digit number they need to be a company director. One number per person, for life.',
+    proves: ['Who you are', 'That they may be a director'],
+    entity: 'person',
+    fields: [
+      text('name', 'Full name', { required: true }),
+      text('din', 'Director ID number', { required: true, placeholder: '00123456', mono: true, help: 'Eight digits. A person only ever gets one.' }),
+      text('father_name', "Father's name"),
+      date('date_of_birth', 'Date of birth'),
+      area('address', 'Address'),
+      date('date_of_allotment', 'Allotted on', { optional: true }),
+    ],
+    render: {
+      template: 'certificate',
+      title: 'DIRECTOR IDENTIFICATION NUMBER',
+      titleLocal: 'निदेशक पहचान संख्या',
+      org: 'MINISTRY OF CORPORATE AFFAIRS — DIN CELL',
+      accent: '#2f4858',
+      numberField: 'din',
+      numberLabel: 'DIN',
+      seal: true,
+    },
+  },
+
+  {
+    id: 'incorporation',
+    name: 'Certificate of incorporation',
+    issuer: 'Registrar of Companies',
+    blurb: 'The birth certificate of a company. Carries the 21-character company number and the registered office.',
+    proves: ['That a company exists', 'Where it is registered'],
+    entity: 'company',
+    fields: [
+      text('company_name', 'Company name', { required: true }),
+      text('cin', 'Company number', { required: true, placeholder: 'U72200KA2013PTC098765', mono: true, help: 'Twenty-one characters. It encodes the state, the year and the kind of company.' }),
+      date('date_of_incorporation', 'Incorporated on'),
+      area('registered_office', 'Registered office'),
+      text('company_pan', "Company's PAN", { optional: true, mono: true, help: 'A company has its own PAN, separate from its directors.' }),
+      text('directors', 'Directors', { optional: true, help: 'Names as listed on the certificate, separated by commas.' }),
+    ],
+    render: {
+      template: 'certificate',
+      title: 'CERTIFICATE OF INCORPORATION',
+      titleLocal: 'निगमन प्रमाणपत्र',
+      org: 'REGISTRAR OF COMPANIES — MINISTRY OF CORPORATE AFFAIRS',
+      accent: '#7a3b2e',
+      numberField: 'cin',
+      numberLabel: 'Corporate Identity Number',
+      seal: true,
+    },
+  },
+
+  {
+    id: 'bank_passbook',
+    name: 'Bank passbook',
+    issuer: 'The account holder’s bank',
+    blurb: 'The front page of a passbook. Widely used to prove a name, an address and a bank account together.',
+    proves: ['Who you are', 'Where you live', 'Your bank account'],
+    entity: 'either',
+    fields: [
+      text('account_holder', 'Account holder', { required: true }),
+      text('account_number', 'Account number', { required: true, mono: true }),
+      text('ifsc', 'Branch code (IFSC)', { required: true, placeholder: 'HDFC0001234', mono: true, help: 'Printed near the branch name. Four letters, a zero, then six characters.' }),
+      text('bank_name', 'Bank'),
+      text('branch', 'Branch'),
+      area('address', 'Address'),
+      text('customer_id', 'Customer ID', { optional: true, mono: true }),
+    ],
+    render: {
+      template: 'certificate',
+      title: 'SAVINGS BANK ACCOUNT PASSBOOK',
+      titleLocal: 'बचत खाता पासबुक',
+      org: 'BHARAT NATIONAL BANK — A GOVERNMENT OF INDIA UNDERTAKING',
+      accent: '#134a6e',
+      numberField: 'account_number',
+      numberLabel: 'Account No.',
+    },
+  },
+);
+
+// Whether a document is about a person, an organisation, or can be either.
+// Used when grouping a pile of documents by who they belong to.
+const ENTITY_KIND = {
+  aadhaar: 'person',
+  pan: 'person',
+  driving_licence: 'person',
+  passport: 'person',
+  voter_id: 'person',
+  vehicle_rc: 'either',
+  ration_card: 'person',
+  birth_certificate: 'person',
+  gst_certificate: 'company',
+  udyam: 'company',
+  nrega_job_card: 'person',
+  abha: 'person',
+};
+
+for (const doc of DOCUMENTS) doc.entity ??= ENTITY_KIND[doc.id] ?? 'person';
+
 export const DOCUMENT_IDS = DOCUMENTS.map((d) => d.id);
 
 export function getDocument(id) {
@@ -384,6 +486,11 @@ const CRITICAL_FIELDS = new Set([
   'abha_number',
   'job_card_number',
   'card_number',
+  'din',
+  'cin',
+  'company_name',
+  'account_holder',
+  'account_number',
 ]);
 
 export const isCriticalField = (key) => CRITICAL_FIELDS.has(key);

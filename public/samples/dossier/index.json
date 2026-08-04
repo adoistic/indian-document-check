@@ -1,0 +1,267 @@
+{
+  "note": "One pile of documents with the right answer written down. Everything is invented.",
+  "files": [
+    {
+      "image": "sandeep-aadhaar.png",
+      "expected_type": "aadhaar",
+      "expected_entity": "sandeep",
+      "expect_identifiers": {
+        "aadhaar": "4721 0938 2659"
+      },
+      "note": null,
+      "printed": {
+        "name": "Sandeep Joshi",
+        "date_of_birth": "1985-09-09",
+        "gender": "Male",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "aadhaar_number": "4721 0938 2659",
+        "guardian_name": "Ramesh Joshi"
+      }
+    },
+    {
+      "image": "sandeep-pan.png",
+      "expected_type": "pan",
+      "expected_entity": "sandeep",
+      "expect_identifiers": {
+        "pan": "BXQPJ7412K"
+      },
+      "note": null,
+      "printed": {
+        "name": "Sandeep Joshi",
+        "father_name": "Ramesh Joshi",
+        "date_of_birth": "1985-09-09",
+        "pan_number": "BXQPJ7412K"
+      }
+    },
+    {
+      "image": "sandeep-voter-id.png",
+      "expected_type": "voter_id",
+      "expected_entity": "sandeep",
+      "expect_identifiers": {
+        "voter_id": "MPX2947183"
+      },
+      "note": null,
+      "printed": {
+        "name": "Sandeep Joshi",
+        "guardian_name": "Ramesh Joshi",
+        "gender": "Male",
+        "date_of_birth": "1985-09-09",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "epic_number": "MPX2947183"
+      }
+    },
+    {
+      "image": "sandeep-driving-licence.png",
+      "expected_type": "driving_licence",
+      "expected_entity": "sandeep",
+      "expect_identifiers": {
+        "driving_licence": "MP0420120004871"
+      },
+      "note": "Name spelt Sandip. Same man.",
+      "printed": {
+        "name": "Sandip Joshi",
+        "guardian_name": "Ramesh Joshi",
+        "date_of_birth": "1985-09-09",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "licence_number": "MP04 20120004871",
+        "blood_group": "B+",
+        "valid_till": "2032-03-14",
+        "vehicle_classes": "LMV"
+      }
+    },
+    {
+      "image": "sandeep-din-letter.png",
+      "expected_type": "din_letter",
+      "expected_entity": "sandeep",
+      "expect_identifiers": {
+        "din": "04728316"
+      },
+      "note": null,
+      "printed": {
+        "name": "Sandeep Joshi",
+        "din": "04728316",
+        "father_name": "Ramesh Joshi",
+        "date_of_birth": "1985-09-09",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "date_of_allotment": "2013-04-02"
+      }
+    },
+    {
+      "image": "sandeep-passbook.png",
+      "expected_type": "bank_passbook",
+      "expected_entity": "sandeep",
+      "expect_identifiers": {
+        "bank_account": "30412876554109"
+      },
+      "note": "No date of birth on it. Groups by name and address.",
+      "printed": {
+        "account_holder": "Sandeep Joshi",
+        "account_number": "30412876554109",
+        "ifsc": "BNBI0004412",
+        "bank_name": "Bharat National Bank",
+        "branch": "Bhopal Main Branch",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "customer_id": "884213907"
+      }
+    },
+    {
+      "image": "joshi-electricals-gst.png",
+      "expected_type": "gst_certificate",
+      "expected_entity": "joshi_electricals",
+      "expect_identifiers": {
+        "gstin": "23BXQPJ7412K1Z7"
+      },
+      "note": null,
+      "printed": {
+        "legal_name": "Joshi Electricals",
+        "trade_name": "Joshi Electricals & Hardware",
+        "gstin": "23BXQPJ7412K1Z7",
+        "address": "Shop 7, New Market, Bhopal, Madhya Pradesh - 462003",
+        "constitution": "Proprietorship",
+        "registration_date": "2019-07-01"
+      }
+    },
+    {
+      "image": "joshi-systems-incorporation.png",
+      "expected_type": "incorporation",
+      "expected_entity": "joshi_systems",
+      "expect_identifiers": {
+        "cin": "U28733MP2013PTC828687",
+        "pan": "AABCJ5521M"
+      },
+      "note": null,
+      "printed": {
+        "company_name": "Joshi Systems Private Limited",
+        "cin": "U28733MP2013PTC828687",
+        "date_of_incorporation": "2013-05-22",
+        "registered_office": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "company_pan": "AABCJ5521M",
+        "directors": "Sandeep Joshi, Lakshmi Devi Reddy"
+      }
+    },
+    {
+      "image": "other-sandeep-voter-id.png",
+      "expected_type": "voter_id",
+      "expected_entity": "sandeep_of_jabalpur",
+      "expect_identifiers": {
+        "voter_id": "MPY8813047"
+      },
+      "note": "Identical name to the first man. Everything else differs.",
+      "printed": {
+        "name": "Sandeep Joshi",
+        "guardian_name": "Vijay Joshi",
+        "gender": "Male",
+        "date_of_birth": "1971-02-24",
+        "address": "9 Kasturba Road, Jabalpur, Madhya Pradesh - 482001",
+        "epic_number": "MPY8813047"
+      }
+    },
+    {
+      "image": "priya-passport.png",
+      "expected_type": "passport",
+      "expected_entity": "priya",
+      "expect_identifiers": {
+        "passport": "N4820613"
+      },
+      "note": null,
+      "printed": {
+        "surname": "Venkatesan",
+        "given_name": "Priya",
+        "date_of_birth": "1995-11-02",
+        "gender": "Female",
+        "place_of_birth": "Chennai",
+        "passport_number": "N4820613",
+        "date_of_issue": "2019-06-14",
+        "date_of_expiry": "2029-06-13"
+      }
+    },
+    {
+      "image": "priya-birth-certificate.png",
+      "expected_type": "birth_certificate",
+      "expected_entity": "priya",
+      "expect_identifiers": {
+        "birth_registration": "BRN/1995/TN/7441946"
+      },
+      "note": "Shares no number with the passport. Groups by name and date of birth.",
+      "printed": {
+        "name": "Priya Venkatesan",
+        "date_of_birth": "1995-11-02",
+        "place_of_birth": "District Hospital, Chennai",
+        "gender": "Female",
+        "father_name": "S Venkatesan",
+        "mother_name": "Meenakshi Venkatesan",
+        "registration_number": "BRN/1995/TN/7441946",
+        "date_of_registration": "1995-11-28"
+      }
+    },
+    {
+      "image": "kavita-ration-card.png",
+      "expected_type": "ration_card",
+      "expected_entity": "kavita",
+      "expect_identifiers": {
+        "ration_card": "RJ20194471820395"
+      },
+      "note": null,
+      "printed": {
+        "head_of_family": "Kavita Bai Meena",
+        "card_number": "RJ-2019-4471820395",
+        "category": "Priority household (PHH)",
+        "address": "Ward 4, Village Bagdi, Tehsil Malpura, Tonk, Rajasthan - 304502",
+        "member_count": "5",
+        "fps_name": "FPS Ward 7"
+      }
+    },
+    {
+      "image": "hardware-receipt.png",
+      "expected_type": "other",
+      "expected_entity": null,
+      "expect_identifiers": {},
+      "note": "Not a document. Should be set aside, not forced into a group.",
+      "printed": {}
+    }
+  ],
+  "entities": {
+    "sandeep": {
+      "kind": "person",
+      "name": "Sandeep Joshi",
+      "about": "The man the pile is mostly about."
+    },
+    "joshi_electricals": {
+      "kind": "company",
+      "name": "Joshi Electricals",
+      "about": "His shop, a proprietorship."
+    },
+    "joshi_systems": {
+      "kind": "company",
+      "name": "Joshi Systems Private Limited",
+      "about": "A company he is a director of."
+    },
+    "sandeep_of_jabalpur": {
+      "kind": "person",
+      "name": "Sandeep Joshi",
+      "about": "A different man with the same name."
+    },
+    "priya": {
+      "kind": "person",
+      "name": "Priya Venkatesan",
+      "about": "Unrelated."
+    },
+    "kavita": {
+      "kind": "person",
+      "name": "Kavita Bai Meena",
+      "about": "Unrelated."
+    }
+  },
+  "relationships": [
+    {
+      "from": "sandeep",
+      "to": "joshi_electricals",
+      "why": "The GST number on the shop contains his personal PAN, which is how a proprietorship is registered."
+    },
+    {
+      "from": "sandeep",
+      "to": "joshi_systems",
+      "why": "He is named as a director on the certificate of incorporation."
+    }
+  ]
+}

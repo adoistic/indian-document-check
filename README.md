@@ -1,16 +1,18 @@
 # Document Check
 
-Somebody hands you an Aadhaar card, a PAN card, a ration card, a GST certificate. You have their details typed into a form. **Do the two agree?**
+Two jobs, on Indian government paperwork.
 
-That is the whole app. Pick which of twelve Indian government documents you have, add a photo, a scan or a PDF of it, and either type the details or let the app read them off the document for you. Press check and you get a plain answer, field by field, alongside what the document actually says.
+**Check one document.** Somebody hands you an Aadhaar card, a PAN card, a GST certificate. You have their details typed into a form. Do the two agree? Pick the document, add a photo or PDF, type the details or let the app read them off for you, and get a plain answer field by field.
 
-**Try it: [indian-document-check.appsadoistic.workers.dev](https://indian-document-check.appsadoistic.workers.dev)** — press *Use a sample instead* at step 2; no real document needed.
+**Sort a pile.** Drop in everything you have — any mix of documents, for any number of people, with nothing labelled. Each file is worked out on its own, then the lot is sorted into who and what they belong to: this man, his shop, the company he directs, and two people who have nothing to do with any of it. Every grouping tells you why.
+
+**Try it: [indian-document-check.appsadoistic.workers.dev](https://indian-document-check.appsadoistic.workers.dev)** — both modes have a ready-made sample; no real document needed.
 
 > Every sample document here is invented. This is a demonstration of document reading — it does not contact any government database, and it cannot tell a good forgery from a real document. Do not put a real ID through it.
 
 ---
 
-## The twelve documents
+## The fifteen documents
 
 Chosen to span what Indians actually get asked for — the RBI's officially valid documents for KYC, plus the business, welfare and health registrations that come up alongside them.
 
@@ -28,8 +30,11 @@ Chosen to span what Indians actually get asked for — the RBI's officially vali
 | **Udyam (MSME) certificate** | Ministry of MSME | A small business, registered for schemes and loans |
 | **MGNREGA job card** | Ministry of Rural Development | A rural household's right to paid work |
 | **ABHA health card** | National Health Authority | The health account that links medical records |
+| **Director ID letter** | Ministry of Corporate Affairs | The 8-digit number a person needs to be a director |
+| **Certificate of incorporation** | Registrar of Companies | A company's birth certificate, with its 21-character number |
+| **Bank passbook** | The account holder's bank | Name, address and bank account on one page |
 
-Each one carries its own fields, its own printed layout, and its own number rules. Adding a thirteenth means one entry in [`public/lib/documents.js`](public/lib/documents.js) — the picker, the form, the prompts, the schema and the sample generator all follow from it.
+Each one carries its own fields, its own printed layout, and its own number rules. Adding a sixteenth means one entry in [`public/lib/documents.js`](public/lib/documents.js) — the picker, the form, the prompts, the schema and the sample generator all follow from it.
 
 ## What it does
 
@@ -45,6 +50,27 @@ Each one carries its own fields, its own printed layout, and its own number rule
 
 **Refuses to guess.** A blurred photo returns "could not tell", not an invented answer. A field that is not on the page comes back empty rather than filled in from thin air.
 
+**Catches its own misreads.** Aadhaar and GST numbers carry a check digit, so a wrong character can be detected without knowing the right one. When a number fails its own check, the document is read again with attention drawn to that field — and the second reading is only accepted if it passes the check the first one failed. In the benchmark this is what recovers a GST number whose 4th and 5th characters came back transposed, and with it the link between a shop and its owner.
+
+## Sorting a pile
+
+Give it a stack of unlabelled files and it works out what each one is, then who they all belong to.
+
+The grouping is **not** a model's job. It is arithmetic on the values already read off each document, so every grouping comes with a reason you can check yourself:
+
+- **A shared reference number.** The strongest evidence there is. Two documents carrying the same PAN are the same person.
+- **A number hidden inside another number.** A GST registration contains its holder's PAN at characters 3–12. When those ten characters match a PAN card in the pile, a shop has been tied to the person who registered it — a link that appears on neither document.
+- **Name plus something else.** Six documents can share no reference number at all and still obviously belong to one man. Name agreement alone is never enough; it has to be backed by a date of birth, an address, or a father's name. This is what keeps two different men called Sandeep Joshi apart.
+- **Names on someone else's paperwork.** The directors printed on a certificate of incorporation, the owner named on a Udyam certificate.
+
+Name comparison folds the ways the same Indian name gets written in English — Sandeep/Sandip, Venkatesan/Venkateshan, Meenakshi/Meenaakshi — and expands initials, so "Priya V." reaches "Priya Venkatesan".
+
+A person and a company are never merged into one entity, however alike their names. They are linked by a **relationship** instead: *runs*, *director of*, *shares an address with* — each with the reason spelled out.
+
+**Contradictions are raised, not resolved.** The same PAN under two different names, or the same Aadhaar number against two dates of birth, is the thing you most want to be told about. It is reported rather than quietly smoothed over.
+
+Files that are not documents — a shop receipt, a photograph of a wall — are set aside rather than forced into a group.
+
 ## Quick start
 
 ```bash
@@ -52,11 +78,11 @@ git clone https://github.com/adoistic/indian-document-check.git
 cd indian-document-check
 npm install
 cp .env.example .env      # then paste your OpenRouter key into .env
-npm run samples           # draw the twelve synthetic documents
+npm run samples && npm run dossier   # draw the sample documents and the benchmark pile
 npm start                 # → http://localhost:5285
 ```
 
-Press **Use a sample instead** at step 2 to try it without a real document.
+Press **Use a sample instead** at step 2 to try one document, or switch to **Sort a pile** and press **Try a ready-made pile**.
 
 ## Configuration
 
@@ -89,14 +115,45 @@ npm test
 
 Two suites, both against the real pipeline:
 
-1. **Reading** — each of the twelve documents is read back and compared with what was printed on it. A field left empty is tolerated; a field filled in *wrongly* is a failure, because a confident wrong answer is the dangerous one.
-2. **Checking** — twenty-six filled-in forms, each with an expected answer, covering exact matches, abbreviations, spelling variants, single-digit typos, wrong categories, an impostor, a wrong-document swap and a grocery receipt.
+1. **Reading** — each of the fifteen documents is read back and compared with what was printed on it. A field left empty is tolerated; a field filled in *wrongly* is a failure, because a confident wrong answer is the dangerous one.
+2. **Checking** — thirty-two filled-in forms, each with an expected answer, covering exact matches, abbreviations, spelling variants, single-digit typos, transposed characters, wrong categories, an impostor, a wrong-document swap and a grocery receipt.
 
 ```
-38/38 checks passed
+47/47 checks passed
 ```
 
 Narrow it down with `npm test -- pan`, or run one half with `--read` / `--check`.
+
+## The benchmark
+
+Sorting a pile is scored rather than admired. `npm run dossier` builds one deliberately awkward stack of thirteen files with the right answer written down beside it, and `npm run bench` scores four things separately, because they fail for different reasons.
+
+The pile is built around the cases that are actually hard:
+
+- **Six documents, no shared number.** Aadhaar, PAN, voter ID, licence, director ID letter and passbook for one man, with no reference number in common. They can only be grouped by name plus date of birth or address.
+- **A spelling variant.** One of those six says *Sandip*, not *Sandeep*. It has to land in his group anyway.
+- **A same-name decoy.** A second Sandeep Joshi, different date of birth, different town, different father. He must **not** land in that group. This single pair is what separates real matching from string comparison.
+- **A link that is on neither document.** His shop's GST number contains his personal PAN, reachable only by pulling ten characters out of the middle of a fifteen-character number.
+- **A company that names him.** Findable through the directors printed on the certificate of incorporation.
+- **A passbook with no date of birth.** Groups by address instead.
+- **A hardware shop receipt.** Must be set aside, not forced into a group.
+
+```
+  Identification   100.0%   13/13 files recognised for what they are
+  Extraction       100.0%   13/13 reference numbers read exactly
+  Grouping         100.0%   F1 · precision 100.0%, recall 100.0%   (16 pairs right, 0 wrongly joined, 0 wrongly split)
+                            6 groups found, 6 expected
+  Connections      100.0%   2/2 links between people and their businesses
+  Set aside        yes      hardware-receipt.png kept out of every group
+
+  13.3s for 13 files
+```
+
+Grouping is scored **pairwise**, the standard measure for entity resolution: of all the pairs of documents that belong together, how many were put together, and of the pairs that were put together, how many belonged? Getting the six-document group right is worth 15 pairs; wrongly merging the two men called Sandeep Joshi would cost 6 false positives.
+
+`npm run bench -- --runs 3` repeats it. Three consecutive runs score full marks on all four measures.
+
+`npm run bench -- --logic` scores the grouping alone, fed the printed values as if every read were perfect — no API calls, instant, free. It separates *did we read it right* from *did we group it right*, which is what you want when a score drops and you need to know which half moved.
 
 ## How it works
 
@@ -121,10 +178,13 @@ Both requests are constrained by a JSON schema generated from the chosen documen
 
 | Path | What lives there |
 | --- | --- |
-| [`public/lib/documents.js`](public/lib/documents.js) | The twelve documents: fields, labels, help text, printed layout |
-| [`public/lib/validators.js`](public/lib/validators.js) | Number rules — Verhoeff, Luhn mod 36, PAN, EPIC, DL, passport, RC |
+| [`public/lib/documents.js`](public/lib/documents.js) | The fifteen documents: fields, labels, help text, printed layout |
+| [`public/lib/validators.js`](public/lib/validators.js) | Number rules — Verhoeff, Luhn mod 36, PAN, CIN, DIN, IFSC, EPIC, DL, passport, RC |
 | [`src/core/schema.js`](src/core/schema.js) | Schemas and prompts, built per document |
-| [`src/core/verify.js`](src/core/verify.js) | The two calls, plus the local checks |
+| [`src/core/verify.js`](src/core/verify.js) | Reading and checking, plus the checksum-guided re-read |
+| [`src/core/identify.js`](src/core/identify.js) | Working out what an unlabelled document is |
+| [`src/core/linking.js`](src/core/linking.js) | Grouping a pile by who it belongs to. Pure arithmetic, no model |
+| [`src/core/pile.js`](src/core/pile.js) | Orchestrating a whole pile, and putting the result into words |
 | [`src/core/api.js`](src/core/api.js) | Routing, shared by both runtimes |
 | [`src/server.js`](src/server.js) / [`worker/index.js`](worker/index.js) | Express for local work, a Worker for production |
 | [`public/`](public) | The interface — no framework, no build step |
@@ -135,7 +195,7 @@ Both requests are constrained by a JSON schema generated from the chosen documen
 
 ## The synthetic documents
 
-`npm run samples` draws all twelve from three SVG templates — a plastic ID card, a passport details page, and a printed certificate — with bilingual headers, a photo box, a QR block, a seal and a guilloche background, in the layout of the real thing. Each is stamped `SYNTHETIC SPECIMEN`.
+`npm run samples` draws all fifteen from three SVG templates — a plastic ID card, a passport details page, and a printed certificate — with bilingual headers, a photo box, a QR block, a seal and a guilloche background, in the layout of the real thing. Each is stamped `SYNTHETIC SPECIMEN`.
 
 The people, businesses, addresses and numbers are invented. ID numbers are generated to pass their own format rules, which exercises the local validation — it makes them well-formed, not issued to anybody.
 
@@ -170,6 +230,26 @@ Two endpoints, both taking JSON.
   "extracted": { "…": "…" },
   "concerns": [],
   "local_checks": [{ "level": "ok", "message": "The PAN is in the right shape…" }]
+}
+```
+
+```jsonc
+// POST /api/sort — a pile of unlabelled files
+{ "files": [{ "id": "1.png", "name": "1.png", "image": "data:image/png;base64,…" }] }
+
+// → what each one is, and who they all belong to
+{
+  "documents":  [{ "id": "1.png", "type": "pan", "typeName": "PAN card", "recognised": true,
+                   "certainty": "high", "fields": [{ "key": "name", "label": "Full name", "value": "…" }],
+                   "checks": [{ "level": "ok", "message": "…" }] }],
+  "entities":   [{ "id": "entity-1", "kind": "person", "name": "Sandeep Joshi",
+                   "documents": ["1.png", "…"],
+                   "identifiers": [{ "type": "pan", "value": "BXQPJ7412K", "derived": false }],
+                   "evidence": ["Same name and the same date of birth (1985-09-09)."] }],
+  "relationships": [{ "from_name": "Sandeep Joshi", "to_name": "Joshi Electricals", "kind": "runs",
+                      "reason": "The GST number contains the PAN BXQPJ7412K, which is his…" }],
+  "conflicts":  [],
+  "narrative":  { "headline": "…", "summary": "…", "extra_concerns": [] }
 }
 ```
 

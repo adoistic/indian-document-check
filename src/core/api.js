@@ -4,6 +4,7 @@
 
 import { documentSummaries, getDocument } from '../../public/lib/documents.js';
 import { checkDocument, readDocument, ReadError } from './verify.js';
+import { sortPile } from './pile.js';
 
 export const DEFAULT_MODEL = 'google/gemini-3.1-flash-lite';
 
@@ -59,6 +60,21 @@ export const handlers = {
       return fail(err);
     }
   },
+
+  /** A pile of unlabelled files: identify each, read each, then group them. */
+  async sort(body, config, signal) {
+    const files = (body?.files ?? [])
+      .filter((f) => f?.image)
+      .map((f, i) => ({ id: f.id ?? `file-${i + 1}`, name: f.name ?? `File ${i + 1}`, image: f.image }));
+
+    if (!files.length) return { status: 400, body: { error: 'Add at least one document.' } };
+
+    try {
+      return { status: 200, body: await sortPile(files, config, signal) };
+    } catch (err) {
+      return fail(err);
+    }
+  },
 };
 
 /** Routes a request to a handler. Returns null for anything that is not an API path. */
@@ -67,5 +83,6 @@ export async function routeApi(pathname, method, body, config, signal) {
   if (pathname === '/api/documents' && method === 'GET') return handlers.documents();
   if (pathname === '/api/read' && method === 'POST') return handlers.read(body, config, signal);
   if (pathname === '/api/check' && method === 'POST') return handlers.check(body, config, signal);
+  if (pathname === '/api/sort' && method === 'POST') return handlers.sort(body, config, signal);
   return null;
 }

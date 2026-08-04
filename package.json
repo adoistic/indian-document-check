@@ -8,10 +8,12 @@
     "start": "npm run vendor --silent && node src/server.js",
     "dev": "npm run vendor --silent && node --watch src/server.js",
     "vendor": "node scripts/sync-vendor.js",
-    "samples": "node scripts/generate-synthetic.js",
+    "samples": "node scripts/generate-synthetic.js && node scripts/generate-dossier.js",
     "test": "node scripts/test-verify.js",
     "cf:dev": "npm run vendor --silent && wrangler dev --port 5285",
-    "cf:deploy": "npm run vendor --silent && wrangler deploy"
+    "cf:deploy": "npm run vendor --silent && wrangler deploy",
+    "dossier": "node scripts/generate-dossier.js",
+    "bench": "node scripts/benchmark.js"
   },
   "keywords": [
     "aadhaar",

@@ -18,17 +18,29 @@
             <span>Does what someone typed match the document they gave you?</span>
           </div>
         </div>
-        <button type="button" class="link-btn" id="how-btn" aria-expanded="false" aria-controls="how-panel">How this works</button>
+        <div class="topbar-right">
+          <div class="modes" role="tablist" aria-label="What you want to do">
+            <button type="button" class="mode" id="mode-one" role="tab" aria-selected="true">Check one document</button>
+            <button type="button" class="mode" id="mode-pile" role="tab" aria-selected="false">Sort a pile</button>
+          </div>
+          <button type="button" class="link-btn" id="how-btn" aria-expanded="false" aria-controls="how-panel">How this works</button>
+        </div>
       </div>
     </header>
 
     <section class="how" id="how-panel" hidden>
       <div class="wrap how-inner">
-        <ol>
-          <li><strong>Pick the document.</strong> Twelve Indian documents are supported, from an Aadhaar card to a GST certificate.</li>
+        <ol id="how-single">
+          <li><strong>Pick the document.</strong> Fifteen Indian documents are supported, from an Aadhaar card to a certificate of incorporation.</li>
           <li><strong>Add a photo, a scan or a PDF of it.</strong> Nothing is stored — the picture is used once and thrown away.</li>
           <li><strong>Let it fill the form in</strong>, or type the details yourself if you already have them.</li>
           <li><strong>Press check.</strong> You get a plain answer, field by field, with what the document actually says.</li>
+        </ol>
+        <ol id="how-pile" hidden>
+          <li><strong>Drop in everything at once.</strong> Any mix of documents, for any number of people. You do not have to say what they are.</li>
+          <li><strong>Each one is worked out on its own</strong> — what kind of document it is, and every name, date and reference number on it.</li>
+          <li><strong>Then they are sorted</strong> into who and what they belong to, by comparing those numbers and names against each other.</li>
+          <li><strong>Connections are drawn out</strong> — which person runs which business, who is a director of what. Every grouping tells you why.</li>
         </ol>
         <p class="how-note">
           Every sample document here is made up. This is a demonstration — it does not contact any government
@@ -37,7 +49,84 @@
       </div>
     </section>
 
-    <main class="wrap layout">
+    <!-- ══ Mode two: a pile of documents ═══════════════════════════ -->
+    <main class="wrap pile-layout" id="pile-view" hidden>
+      <section class="card">
+        <h2>Drop in everything you have</h2>
+        <p class="lede">
+          Any mix of documents, for any number of people. Each one is worked out on its own — you do not have to say
+          what they are — and then they are sorted into who and what they belong to.
+        </p>
+
+        <div class="dropzone" id="pile-drop" tabindex="0" role="button" aria-label="Choose files">
+          <input id="pile-input" type="file" accept="image/*,application/pdf" multiple hidden />
+          <div class="drop-empty">
+            <span class="drop-icon" aria-hidden="true">+</span>
+            <strong>Choose files, or drag them here</strong>
+            <span class="muted">Photos, scans or PDFs. Up to twenty at a time.</span>
+          </div>
+        </div>
+
+        <ul class="tray" id="tray"></ul>
+
+        <div class="row-between">
+          <button type="button" class="link-btn" id="pile-sample-btn">Try a ready-made pile</button>
+          <button type="button" class="link-btn" id="pile-clear" hidden>Clear</button>
+        </div>
+
+        <button type="button" class="primary-btn" id="pile-go" disabled>Sort these documents</button>
+        <p class="alert" id="pile-error" hidden></p>
+      </section>
+
+      <section class="card" id="pile-result-card">
+        <h2 class="result-head">What you have</h2>
+
+        <div class="empty" id="pile-empty">
+          <p>Add some documents and they will be sorted here — by person, by company, and by how they connect.</p>
+        </div>
+
+        <div class="busy" id="pile-busy" hidden>
+          <div class="spinner" aria-hidden="true"></div>
+          <p id="pile-busy-text">Working through the pile…</p>
+        </div>
+
+        <div id="pile-result" hidden>
+          <p class="headline" id="pile-headline"></p>
+          <p class="pile-summary" id="pile-summary"></p>
+
+          <div id="pile-conflicts-block" hidden>
+            <h3>Contradictions</h3>
+            <ul class="concerns" id="pile-conflicts"></ul>
+          </div>
+
+          <h3>Who and what</h3>
+          <div class="entities" id="entities"></div>
+
+          <div id="rel-block" hidden>
+            <h3>How they connect</h3>
+            <ul class="rels" id="rels"></ul>
+          </div>
+
+          <div id="aside-block" hidden>
+            <h3>Set aside</h3>
+            <ul class="aside-list" id="aside-list"></ul>
+          </div>
+
+          <div id="pile-notes-block" hidden>
+            <h3>Worth a closer look</h3>
+            <ul class="concerns" id="pile-notes"></ul>
+          </div>
+
+          <details class="tech">
+            <summary>Show the full record</summary>
+            <pre id="pile-raw"></pre>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <!-- ══ Mode one: a single document against a form ══════════════ -->
+    <main class="wrap layout" id="single-view">
       <!-- ── Left column: the work ──────────────────────────────── -->
       <div class="column">
         <!-- Step 1 -->

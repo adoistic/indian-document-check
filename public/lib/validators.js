@@ -67,6 +67,20 @@ export function gstinCheckChar(first14) {
   return GST_ALPHABET[(36 - (sum % 36)) % 36];
 }
 
+// Characters 13-15 of a company number say what kind of company it is.
+const COMPANY_TYPES = {
+  PLC: 'a public limited company',
+  PTC: 'a private limited company',
+  OPC: 'a one-person company',
+  FTC: 'a subsidiary of a foreign company',
+  GAP: 'a government company',
+  SGC: 'a state government company',
+  NPL: 'a not-for-profit company',
+  ULL: 'an unlimited liability company',
+  ULT: 'an unlimited liability public company',
+  GAT: 'a general association',
+};
+
 // PAN's 4th character encodes the kind of taxpayer. P is an individual.
 const PAN_HOLDER_TYPES = {
   A: 'an association of persons',
@@ -153,6 +167,36 @@ export const NUMBER_CHECKS = {
     return { ok: true, message: 'The GST number is in the right shape and its check character adds up.' };
   },
 
+  din(value) {
+    const d = digitsOnly(value);
+    if (d.length !== 8) return { ok: false, message: `A director's ID number has 8 digits. This one has ${d.length}.` };
+    return { ok: true, message: 'The director ID number is in the right shape.' };
+  },
+
+  cin(value) {
+    const c = upperAlnum(value);
+    if (c.length !== 21) return { ok: false, message: `A company number has 21 characters. This one has ${c.length}.` };
+    if (!/^[LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$/.test(c)) {
+      return { ok: false, message: 'A company number looks like U72200KA2013PTC098765 — listed or unlisted, industry, state, year, company type, then the registration number.' };
+    }
+    const year = Number(c.slice(8, 12));
+    const thisYear = new Date().getFullYear();
+    if (year < 1850 || year > thisYear) return { ok: false, message: `The company number says the company was incorporated in ${year}, which cannot be right.` };
+
+    const listed = c[0] === 'L' ? 'listed on a stock exchange' : 'not listed on a stock exchange';
+    const kind = COMPANY_TYPES[c.slice(12, 15)];
+    const trailer = kind ? `, and is ${kind}` : '';
+    return { ok: true, message: `The company number is in the right shape: registered in ${c.slice(6, 8)} in ${year}, ${listed}${trailer}.` };
+  },
+
+  ifsc(value) {
+    const i = upperAlnum(value);
+    if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(i)) {
+      return { ok: false, message: 'A bank branch code looks like HDFC0001234 — four letters for the bank, a zero, then six characters for the branch.' };
+    }
+    return { ok: true, message: `The branch code is in the right shape. The bank is ${i.slice(0, 4)}.` };
+  },
+
   udyam_number(value) {
     const u = String(value ?? '').toUpperCase().replace(/\s/g, '');
     if (!/^UDYAM-[A-Z]{2}-\d{2}-\d{7}$/.test(u)) {
@@ -183,6 +227,9 @@ export const NUMBER_FORMATTERS = {
   passport_number: (v) => upperAlnum(v).slice(0, 8),
   epic_number: (v) => upperAlnum(v).slice(0, 10),
   gstin: (v) => upperAlnum(v).slice(0, 15),
+  cin: (v) => upperAlnum(v).slice(0, 21),
+  din: (v) => digitsOnly(v).slice(0, 8),
+  ifsc: (v) => upperAlnum(v).slice(0, 11),
   registration_number: (v) => upperAlnum(v).slice(0, 11),
   abha_number: (v) => digitsOnly(v).slice(0, 14).replace(/^(\d{2})(\d{4})?(\d{4})?(\d{0,4})?$/, (_, a, b, c, d) =>
     [a, b, c, d].filter(Boolean).join('-')),

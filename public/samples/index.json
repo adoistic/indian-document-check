@@ -141,6 +141,40 @@
         "abha_address": "lakshmi82@abdm",
         "address": "7-1-58/2 Ameerpet Main Road, Hyderabad, Telangana - 500016"
       }
+    },
+    "din_letter": {
+      "image": "din_letter.png",
+      "printed": {
+        "name": "Sandeep Joshi",
+        "din": "89637409",
+        "father_name": "Ramesh Joshi",
+        "date_of_birth": "1985-09-09",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "date_of_allotment": "2017-11-06"
+      }
+    },
+    "incorporation": {
+      "image": "incorporation.png",
+      "printed": {
+        "company_name": "Joshi Systems Private Limited",
+        "cin": "U28733MP2013PTC828687",
+        "date_of_incorporation": "2013-05-22",
+        "registered_office": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "company_pan": "VCWCJ8664R",
+        "directors": "Sandeep Joshi, Lakshmi Devi Reddy"
+      }
+    },
+    "bank_passbook": {
+      "image": "bank_passbook.png",
+      "printed": {
+        "account_holder": "Mohammed Arif Ansari",
+        "account_number": "62303599573210",
+        "ifsc": "QVOI0068685",
+        "bank_name": "Bharat National Bank",
+        "branch": "Mumbai Main Branch",
+        "address": "Flat 604, Sunrise Apartments, Andheri East, Mumbai, Maharashtra - 400069",
+        "customer_id": "530572959"
+      }
     }
   },
   "cases": [
@@ -518,6 +552,98 @@
         "gender": "Female",
         "abha_address": "",
         "address": "7-1-58/2 Ameerpet Main Road, Hyderabad, Telangana - 500016"
+      }
+    },
+    {
+      "id": "din_letter-match",
+      "document": "din_letter",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "din_letter.png",
+      "submission": {
+        "name": "Sandeep Joshi",
+        "din": "89637409",
+        "father_name": "Ramesh Joshi",
+        "date_of_birth": "1985-09-09",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "date_of_allotment": "2017-11-06"
+      }
+    },
+    {
+      "id": "din_letter-slip",
+      "document": "din_letter",
+      "label": "Two digits of the director ID swapped round",
+      "expected_verdict": "mismatch",
+      "image": "din_letter.png",
+      "submission": {
+        "name": "Sandeep Joshi",
+        "din": "89634709",
+        "father_name": "Ramesh Joshi",
+        "date_of_birth": "1985-09-09",
+        "address": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "date_of_allotment": "2017-11-06"
+      }
+    },
+    {
+      "id": "incorporation-match",
+      "document": "incorporation",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "incorporation.png",
+      "submission": {
+        "company_name": "Joshi Systems Private Limited",
+        "cin": "U28733MP2013PTC828687",
+        "date_of_incorporation": "2013-05-22",
+        "registered_office": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "company_pan": "VCWCJ8664R",
+        "directors": "Sandeep Joshi, Lakshmi Devi Reddy"
+      }
+    },
+    {
+      "id": "incorporation-slip",
+      "document": "incorporation",
+      "label": "Company name given without \"Private Limited\"",
+      "expected_verdict": "partial_match",
+      "image": "incorporation.png",
+      "submission": {
+        "company_name": "Joshi Systems",
+        "cin": "U28733MP2013PTC828687",
+        "date_of_incorporation": "2013-05-22",
+        "registered_office": "Plot 12, Vasant Vihar Colony, Bhopal, Madhya Pradesh - 462003",
+        "company_pan": "VCWCJ8664R",
+        "directors": "Sandeep Joshi, Lakshmi Devi Reddy"
+      }
+    },
+    {
+      "id": "bank_passbook-match",
+      "document": "bank_passbook",
+      "label": "Details typed exactly as printed",
+      "expected_verdict": "match",
+      "image": "bank_passbook.png",
+      "submission": {
+        "account_holder": "Mohammed Arif Ansari",
+        "account_number": "62303599573210",
+        "ifsc": "QVOI0068685",
+        "bank_name": "Bharat National Bank",
+        "branch": "Mumbai Main Branch",
+        "address": "Flat 604, Sunrise Apartments, Andheri East, Mumbai, Maharashtra - 400069",
+        "customer_id": "530572959"
+      }
+    },
+    {
+      "id": "bank_passbook-slip",
+      "document": "bank_passbook",
+      "label": "Branch code typed with a letter O instead of a zero",
+      "expected_verdict": "mismatch",
+      "image": "bank_passbook.png",
+      "submission": {
+        "account_holder": "Mohammed Arif Ansari",
+        "account_number": "62303599573210",
+        "ifsc": "QVOIO068685",
+        "bank_name": "Bharat National Bank",
+        "branch": "Mumbai Main Branch",
+        "address": "Flat 604, Sunrise Apartments, Andheri East, Mumbai, Maharashtra - 400069",
+        "customer_id": "530572959"
       }
     },
     {

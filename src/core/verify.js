@@ -3,6 +3,7 @@
 
 import { getDocument, isCriticalField } from '../../public/lib/documents.js';
 import { extractionPrompt, extractionSchema, verificationPrompt, verificationSchema } from './schema.js';
+import { IDENTIFY_PROMPT, IDENTIFY_SCHEMA } from './identify.js';
 import { checkDate, checkNumber } from '../../public/lib/validators.js';
 
 const ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
@@ -32,7 +33,7 @@ function asImageUrl(image) {
   return `data:image/png;base64,${value}`;
 }
 
-async function callModel({ system, user, image, schema, config, signal }) {
+export async function callModel({ system, user, image, schema, config, signal }) {
   const apiKey = config?.apiKey;
   if (!apiKey) throw new ReadError('This copy of the app has not been given a key yet, so it cannot read documents.', 500);
 
@@ -56,10 +57,14 @@ async function callModel({ system, user, image, schema, config, signal }) {
           { role: 'system', content: system },
           {
             role: 'user',
-            content: [
-              { type: 'text', text: user },
-              { type: 'image_url', image_url: { url: asImageUrl(image) } },
-            ],
+            // The final summary pass reasons over text alone, so the image part
+            // is only added when there is one.
+            content: image
+              ? [
+                  { type: 'text', text: user },
+                  { type: 'image_url', image_url: { url: asImageUrl(image) } },
+                ]
+              : user,
           },
         ],
         response_format: { type: 'json_schema', json_schema: schema },
@@ -155,8 +160,29 @@ export function localChecks(docId, submission) {
 
 // ── Public API ────────────────────────────────────────────────────────────
 
-/** Read a document and return the values printed on it, ready to drop into the form. */
-export async function readDocument(docId, image, config, signal) {
+/** Work out what an unlabelled document is, and who it is about. */
+export async function identifyDocument(image, config, signal) {
+  const { parsed, meta } = await callModel({
+    system: IDENTIFY_PROMPT.system,
+    user: IDENTIFY_PROMPT.user,
+    image,
+    schema: IDENTIFY_SCHEMA,
+    config,
+    signal,
+  });
+  return { ...parsed, meta };
+}
+
+/**
+ * Read a document and return the values printed on it, ready to drop into the form.
+ *
+ * Aadhaar and GST numbers carry check digits, so a misread character can be
+ * caught without knowing the right answer. When one fails, the document is read
+ * a second time with attention drawn to that field — and the new value is only
+ * accepted if it passes the check the old one failed. A transposed pair of
+ * characters in a fifteen-character number is exactly the error this catches.
+ */
+export async function readDocument(docId, image, config, signal, { reread = true } = {}) {
   const doc = getDocument(docId);
   if (!doc) throw new ReadError(`Unknown document type "${docId}".`, 400);
 
@@ -170,7 +196,52 @@ export async function readDocument(docId, image, config, signal) {
     if (field.type === 'date') extracted[field.key] = normaliseDate(extracted[field.key]);
   }
 
-  return { document: docId, document_assessment: parsed.document_assessment, extracted, meta };
+  const corrected = [];
+  const failing = doc.fields.filter((f) => {
+    const check = checkNumber(f.key, extracted[f.key]);
+    return check && !check.ok;
+  });
+
+  if (reread && failing.length) {
+    const complaints = failing
+      .map((f) => `- ${f.label}: you read "${extracted[f.key]}", and it does not pass the check built into that number.`)
+      .join('\n');
+
+    try {
+      const second = await callModel({
+        system,
+        user: `${user}
+
+You have read this document once already, and these came back wrong:
+${complaints}
+
+Numbers of this kind carry a check digit, so a wrong character can be detected without knowing the true value. Look at those fields again, character by character, and read them exactly as printed. The usual culprits are 0 against O, 1 against I and l, 5 against S, 8 against B, 2 against Z, and two adjacent letters read in the wrong order. Everything else on the document you may report as before.`,
+        image,
+        schema: extractionSchema(docId),
+        config,
+        signal,
+      });
+
+      // Only take a second reading where it passes the check the first failed.
+      for (const field of failing) {
+        const candidate = second.parsed.extracted?.[field.key];
+        const check = checkNumber(field.key, candidate);
+        if (candidate && check?.ok) {
+          extracted[field.key] = candidate;
+          corrected.push(field.key);
+        }
+      }
+    } catch {
+      // The first reading stands, and the failing check is reported as it is.
+    }
+  }
+
+  return {
+    document: docId,
+    document_assessment: parsed.document_assessment,
+    extracted,
+    meta: { ...meta, reread: failing.map((f) => f.key), corrected },
+  };
 }
 
 /** Compare a filled-in form against the document. */
