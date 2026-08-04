@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aadhaar Form Verifier</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪪</text></svg>"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">🪪</span>
+          <div>
+            <h1>Aadhaar Form Verifier</h1>
+            <p class="brand-sub">Does what they typed match the card they uploaded?</p>
+          </div>
+        </div>
+        <div class="topbar-meta">
+          <span class="pill" id="model-pill">model: …</span>
+          <span class="pill" id="key-pill">key: …</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- ── Left: the form ───────────────────────────────────────── -->
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Applicant details</h2>
+          <button type="button" class="ghost-btn" id="sample-btn">Load sample</button>
+        </div>
+
+        <form id="verify-form" novalidate>
+          <div class="field">
+            <label for="name">Full name <span class="req">*</span></label>
+            <input id="name" name="name" type="text" autocomplete="off" placeholder="As printed on the card" required />
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="date_of_birth">Date of birth</label>
+              <input id="date_of_birth" name="date_of_birth" type="date" />
+            </div>
+            <div class="field">
+              <label for="gender">Gender</label>
+              <select id="gender" name="gender">
+                <option value="">—</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Transgender</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="address">Address</label>
+            <textarea id="address" name="address" rows="3" placeholder="House / street, locality, city, state, PIN"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="aadhaar_number">Aadhaar number <span class="req">*</span></label>
+            <input
+              id="aadhaar_number"
+              name="aadhaar_number"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="1234 5678 9012"
+              maxlength="14"
+              required
+            />
+            <p class="hint" id="aadhaar-hint">12 digits. Checked locally against the Verhoeff checksum.</p>
+          </div>
+
+          <div class="field">
+            <label for="guardian_name">Father's / guardian's name <span class="opt">optional</span></label>
+            <input id="guardian_name" name="guardian_name" type="text" autocomplete="off" placeholder="If printed on the card" />
+          </div>
+
+          <hr class="rule" />
+
+          <div class="field">
+            <label for="file-input">Aadhaar document <span class="req">*</span></label>
+            <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-describedby="drop-hint">
+              <input id="file-input" type="file" accept="image/*,application/pdf" hidden />
+              <div class="dropzone-empty" id="dropzone-empty">
+                <span class="drop-icon" aria-hidden="true">⬆</span>
+                <strong>Drop an image or PDF</strong>
+                <span id="drop-hint" class="hint">PNG, JPEG, WebP or PDF — the first page of a PDF is rendered to an image in your browser.</span>
+              </div>
+              <figure class="preview" id="preview" hidden>
+                <img id="preview-img" alt="Preview of the uploaded document" />
+                <figcaption id="preview-caption"></figcaption>
+              </figure>
+            </div>
+            <button type="button" class="ghost-btn small" id="clear-file" hidden>Remove document</button>
+          </div>
+
+          <button type="submit" class="primary-btn" id="submit-btn">Verify against document</button>
+          <p class="form-error" id="form-error" hidden></p>
+        </form>
+      </section>
+
+      <!-- ── Right: the result ─────────────────────────────────────── -->
+      <section class="panel results" id="results-panel">
+        <div class="panel-head">
+          <h2>Result</h2>
+          <span class="pill subtle" id="latency-pill" hidden></span>
+        </div>
+
+        <div class="placeholder" id="placeholder">
+          <p>Fill in the form, attach the card, and the result lands here.</p>
+        </div>
+
+        <div class="loading" id="loading" hidden>
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Reading the document…</p>
+        </div>
+
+        <div id="result" hidden>
+          <div class="verdict" id="verdict">
+            <span class="verdict-dot" aria-hidden="true"></span>
+            <div>
+              <strong id="verdict-title"></strong>
+              <span id="verdict-confidence" class="verdict-conf"></span>
+            </div>
+          </div>
+
+          <p class="summary" id="summary"></p>
+
+          <h3 class="section-title">Field by field</h3>
+          <ul class="fields" id="field-list"></ul>
+
+          <h3 class="section-title">Read from the document</h3>
+          <dl class="extracted" id="extracted"></dl>
+
+          <div id="flags-block" hidden>
+            <h3 class="section-title">Red flags</h3>
+            <ul class="flags" id="flags"></ul>
+          </div>
+
+          <h3 class="section-title">Local checks</h3>
+          <ul class="checks" id="checks"></ul>
+
+          <h3 class="section-title">Document assessment</h3>
+          <p class="doc-note" id="doc-note"></p>
+
+          <details class="raw">
+            <summary>Raw JSON response</summary>
+            <pre id="raw-json"></pre>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <p>
+        Synthetic test data only. This is a demo of structured LLM output — it is not a UIDAI-authorised identity check and
+        must not be used as one.
+      </p>
+    </footer>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

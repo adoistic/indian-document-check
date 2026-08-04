@@ -1,0 +1,31 @@
+{
+  "name": "aadhaar-form-verifier",
+  "version": "1.0.0",
+  "description": "Compare a submitted identity form against an uploaded Aadhaar card image or PDF using an LLM with strict JSON-schema structured output (via OpenRouter).",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "synth": "node scripts/generate-synthetic.js",
+    "test:verify": "node scripts/test-verify.js"
+  },
+  "keywords": [
+    "aadhaar",
+    "kyc",
+    "openrouter",
+    "structured-output",
+    "document-verification",
+    "gemini"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "pdfjs-dist": "^4.10.38",
+    "sharp": "^0.34.3"
+  }
+}

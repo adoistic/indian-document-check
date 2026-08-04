@@ -1,0 +1,22 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.key
+secrets.json
+
+# Dependencies
+node_modules/
+
+# Generated synthetic fixtures (regenerate with `npm run synth`)
+samples/
+
+# Local tooling
+.claude/
+
+# Logs / OS cruft
+npm-debug.log*
+*.log
+.DS_Store
+.vscode/
+.idea/
