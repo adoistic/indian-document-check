@@ -155,6 +155,25 @@ Grouping is scored **pairwise**, the standard measure for entity resolution: of 
 
 `npm run bench -- --logic` scores the grouping alone, fed the printed values as if every read were perfect — no API calls, instant, free. It separates *did we read it right* from *did we group it right*, which is what you want when a score drops and you need to know which half moved.
 
+## The demo film
+
+```bash
+npm run video
+```
+
+Builds a narrated three-minute walkthrough into `video/build/document-check.mp4`. Four steps, each runnable on its own:
+
+| Step | What it does |
+| --- | --- |
+| `video/slides.js` | Draws the title, chapter and closing cards as SVG, in the app's own palette |
+| `video/narrate.js` | Reads each line of the script aloud, one voice throughout, cached by the text so an edit only re-reads what changed |
+| `video/capture.js` | Drives the running app with Playwright and records it, drawing a cursor into the page so the clicks are visible |
+| `video/build.js` | Fits every scene to the length of its own line and lays the voice over the top |
+
+The narration sets the timing: a slide is held for exactly as long as its line takes to say, and a recording is stretched or tightened to match, holding on its last frame rather than crawling if it falls short. Nothing can drift out of sync because nothing is timed by hand.
+
+`node video/capture.js pile` re-records one session and keeps the other. Narration needs `KIE_API_KEY` in `.env`; the other three steps need nothing.
+
 ## How it works
 
 ```

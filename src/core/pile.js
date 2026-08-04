@@ -116,6 +116,21 @@ const NARRATIVE_SCHEMA = {
   },
 };
 
+/**
+ * Strips reference numbers out of a sentence meant for the summary.
+ *
+ * The numbers are not the point of a written summary, and leaving them in
+ * causes a specific, repeatable mistake: a GST number and the PAN contained
+ * within it appear as two similar-looking strings, and get reported as a
+ * transposition error on a document nobody has looked at. The numbers stay in
+ * the interface and in the full record, where they belong.
+ */
+const withoutNumbers = (sentence) =>
+  String(sentence ?? '')
+    .replace(/\s*\((?=[A-Z0-9-]{8,}\))[A-Z0-9-]{8,}\)/g, '')
+    .replace(/\b(?=[A-Z0-9-]*\d)[A-Z0-9][A-Z0-9-]{7,}\b/g, 'that number')
+    .replace(/\s{2,}/g, ' ');
+
 /** The linking result, flattened into something readable to reason over. */
 function describeForNarrative(result, documents) {
   const lines = [];
@@ -126,16 +141,20 @@ function describeForNarrative(result, documents) {
     if (entity.dateOfBirth) lines.push(`  date of birth: ${entity.dateOfBirth}`);
     if (entity.address) lines.push(`  address: ${entity.address}`);
     lines.push(`  documents: ${docs.map((d) => d.typeName).join(', ')}`);
-    for (const identifier of entity.identifiers) {
-      lines.push(`  ${identifier.type}: ${identifier.value}${identifier.derived ? ' (worked out from another number, not printed)' : ''}`);
-    }
+
+    // Only numbers actually printed on the documents. A number worked out from
+    // inside another one reads here as a second, conflicting number and gets
+    // reported as a clerical error that does not exist — and the connection it
+    // supports is already spelled out under "Connections found" below.
+    const printed = entity.identifiers.filter((i) => !i.derived);
+    if (printed.length) lines.push(`  carries: ${printed.map((i) => i.type).join(', ')}`);
     for (const reason of [...new Set(entity.evidence)]) lines.push(`  grouped because: ${reason}`);
     lines.push('');
   }
 
   if (result.relationships.length) {
     lines.push('Connections found:');
-    for (const rel of result.relationships) lines.push(`  ${rel.from_name} ${rel.kind} ${rel.to_name ?? '—'}: ${rel.reason}`);
+    for (const rel of result.relationships) lines.push(`  ${rel.from_name} ${rel.kind} ${rel.to_name ?? '—'}: ${withoutNumbers(rel.reason)}`);
     lines.push('');
   }
 
@@ -162,7 +181,11 @@ Your job is to put it into plain English for somebody at a counter.
 - Do not repeat the reference numbers back unless one of them is the point.
 - No jargon, no percentages, no talk of matching or algorithms.
 - Raise anything a careful person would notice that pure comparison would miss: two groups that look like the same person spelt differently, a document that does not belong with the rest, a missing piece.
-- If the grouping looks wrong to you, say so in extra_concerns. Do not pretend to be certain.`;
+- If the grouping looks wrong to you, say so in extra_concerns. Do not pretend to be certain.
+
+Two warnings about what you are reading, because getting these wrong invents problems that do not exist:
+- An Indian GST number is *built out of* its holder's PAN — the PAN sits inside the middle of it. So a GST number and the PAN within it are one number, not two, and they can never contradict each other. Never call that a discrepancy or a clerical error.
+- You are looking at a summary, not the documents themselves. Do not claim anything about how a document is printed, laid out or worded, and do not diagnose errors on it. If it is not stated here, it is not a concern.`;
 
 /**
  * The whole job.

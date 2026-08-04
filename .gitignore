@@ -24,3 +24,6 @@ npm-debug.log*
 .DS_Store
 .vscode/
 .idea/
+
+# Video build artefacts (regenerate with `npm run video`)
+video/build/

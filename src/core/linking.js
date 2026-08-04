@@ -450,7 +450,9 @@ function findRelationships(facts, entities) {
           match,
           owner,
           kindOfHolder === 'person' ? 'runs' : 'linked',
-          `The GST number on the ${doc.label} contains the PAN ${derived.value}, which is ${match.name}'s. A GST registration carries the PAN of whoever holds it.`,
+          // Worded so it cannot be read as two conflicting numbers: every GST
+          // number is built around its holder's PAN, and this one is theirs.
+          `Every GST number is built around the PAN of whoever registered it. The PAN inside this one (${derived.value}) is ${match.name}'s own, so the business is registered in their personal name.`,
         );
       }
     }
