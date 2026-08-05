@@ -9,6 +9,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
+import { CREDIT } from './music.js';
+
 const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), 'build', 'slides');
 
 const W = 1920;
@@ -237,9 +239,10 @@ const SLIDES = {
       <text x="${W / 2}" y="450" text-anchor="middle" font-size="80" font-weight="660" letter-spacing="-2" fill="${INK}">Far fewer mistakes.</text>
       <text x="${W / 2}" y="570" text-anchor="middle" font-size="80" font-weight="660" letter-spacing="-2" fill="${ACCENT}">A second pair of eyes.</text>
       <text x="${W / 2}" y="700" text-anchor="middle" font-size="36" fill="${DIM}">Fifteen Indian documents. Read, checked, and sorted into who they belong to.</text>
-      ${icons.card(W / 2 - 200, 810, 74, INK)}
-      <text x="${W / 2} " y="866" text-anchor="middle" font-size="46" font-weight="620" fill="${INK}">Document Check</text>
-      <text x="${W / 2}" y="924" text-anchor="middle" font-size="29" fill="${DIM}">Every document shown here is invented. A demonstration, not an identity service.</text>
+      ${icons.card(W / 2 - 296, 800, 74, INK)}
+      <text x="${W / 2 + 26}" y="856" text-anchor="middle" font-size="46" font-weight="620" fill="${INK}">Document Check</text>
+      <text x="${W / 2}" y="910" text-anchor="middle" font-size="29" fill="${DIM}">Every document shown here is invented. A demonstration, not an identity service.</text>
+      <text x="${W / 2}" y="978" text-anchor="middle" font-size="23" fill="${DIM}">${esc(CREDIT)}</text>
       ${ribbon(H - 18)}`),
 };
 

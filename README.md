@@ -168,11 +168,18 @@ Builds a narrated three-minute walkthrough into `video/build/document-check.mp4`
 | `video/slides.js` | Draws the title, chapter and closing cards as SVG, in the app's own palette |
 | `video/narrate.js` | Reads each line of the script aloud, one voice throughout, cached by the text so an edit only re-reads what changed |
 | `video/capture.js` | Drives the running app with Playwright and records it, drawing a cursor into the page so the clicks are visible |
-| `video/build.js` | Fits every scene to the length of its own line and lays the voice over the top |
+| `video/music.js` | Fetches the background music from Wikimedia Commons, and carries its credit |
+| `video/build.js` | Fits every scene to the length of its own line, then lays the voice and the music under it |
 
 The narration sets the timing: a slide is held for exactly as long as its line takes to say, and a recording is stretched or tightened to match, holding on its last frame rather than crawling if it falls short. Nothing can drift out of sync because nothing is timed by hand.
 
-`node video/capture.js pile` re-records one session and keeps the other. Narration needs `KIE_API_KEY` in `.env`; the other three steps need nothing.
+The music sits well under the voice and steps back further whenever she is speaking. The sidechain is keyed off the narration itself, so the bed lifts in the gaps between lines and during the pauses on the slides without anyone drawing an envelope by hand. The final mix is levelled to −16 LUFS.
+
+`node video/capture.js pile` re-records one session and keeps the other. Narration needs `KIE_API_KEY` in `.env`; the other steps need nothing.
+
+### Credits
+
+Background music: **“Calmant”** by **Kevin MacLeod** ([incompetech.com](https://incompetech.com)), licensed [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/), via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Kevin_MacLeod_-_Calmant.ogg). Chosen for being one continuous piece a little longer than the film, so it begins where the film begins and resolves on its own rather than being cut off mid-phrase. The same credit is printed on the closing card of the video, which is what CC BY asks for.
 
 ## How it works
 

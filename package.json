@@ -14,7 +14,7 @@
     "cf:deploy": "npm run vendor --silent && wrangler deploy",
     "dossier": "node scripts/generate-dossier.js",
     "bench": "node scripts/benchmark.js",
-    "video": "node video/slides.js && node video/narrate.js && node video/capture.js && node video/build.js",
+    "video": "node video/music.js && node video/slides.js && node video/narrate.js && node video/capture.js && node video/build.js",
     "video:build": "node video/build.js"
   },
   "keywords": [

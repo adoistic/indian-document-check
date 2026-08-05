@@ -15,6 +15,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { SCENES, GAP_SECONDS, LONG_GAP_AFTER } from './script.js';
+import { ensureMusic } from './music.js';
 
 const run = promisify(execFile);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -178,14 +179,37 @@ async function main() {
   await ffmpeg(['-f', 'concat', '-safe', '0', '-i', list, '-c', 'copy', silent]);
 
   const voice = await buildVoice(scenes);
+  const music = await ensureMusic();
   const total = await duration(silent);
+
+  /**
+   * The music sits well under the voice and steps back further whenever she is
+   * speaking — the sidechain is keyed off the narration itself, so it lifts in
+   * the gaps between lines and during the pauses on the slides, without anyone
+   * drawing an envelope by hand.
+   */
+  const audioMix = [
+    `[2:a]atrim=0:${total.toFixed(2)},asetpts=N/SR/TB,aresample=48000,aformat=channel_layouts=stereo,` +
+      // Keep the bed out of the way of the voice's own range.
+      `highpass=f=90,lowpass=f=9000,` +
+      `afade=t=in:st=0:d=4,afade=t=out:st=${Math.max(0, total - 7).toFixed(2)}:d=7,` +
+      `volume=0.30[bed]`,
+    '[1:a]aresample=48000,aformat=channel_layouts=stereo,asplit=2[voice][key]',
+    '[bed][key]sidechaincompress=threshold=0.025:ratio=9:attack=25:release=420:makeup=1[ducked]',
+    '[voice][ducked]amix=inputs=2:duration=first:normalize=0[raw]',
+    `[raw]afade=t=in:st=0:d=0.4,afade=t=out:st=${(total - 1).toFixed(2)}:d=1.0,` +
+      'loudnorm=I=-16:TP=-1.5:LRA=11[mix]',
+  ].join(';');
 
   const final = path.join(BUILD, 'document-check.mp4');
   await ffmpeg([
     '-i', silent,
     '-i', voice,
+    '-i', music,
+    '-filter_complex', audioMix,
+    '-map', '0:v:0',
+    '-map', '[mix]',
     '-vf', `fade=t=in:st=0:d=0.7,fade=t=out:st=${(total - 1).toFixed(2)}:d=1.0`,
-    '-af', `afade=t=in:st=0:d=0.4,afade=t=out:st=${(total - 1).toFixed(2)}:d=1.0`,
     '-c:v', 'libx264', '-preset', 'slow', '-crf', '20', '-pix_fmt', 'yuv420p',
     '-c:a', 'aac', '-b:a', '192k',
     '-movflags', '+faststart',
